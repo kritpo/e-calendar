@@ -2,6 +2,8 @@
 .nyc_output/
 coverage/
 dist/
+**/swagger.ts
+**/routes.ts
 
 ### NPM generated files ###
 **/package-lock.json

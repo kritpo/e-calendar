@@ -143,6 +143,13 @@ No generation from librairies is realized in this command, it must be done manua
 
 Check and fix all `Typescript` errors in the code.
 
+### `npm run tsoa`
+
+Generate all necessary files of `TSOA`.\
+It mainly generate documentation and routes specification.
+
+All generated files are directly put into subfolders of `./src` directory.
+
 ### `npm run build`
 
 Transpiled `Typescript` source code into `Javascript` code.
@@ -160,6 +167,10 @@ Should be used with `npm run build`
 Launches the test runner from pre-transpiled code with coverage support.
 
 No transpilation from `Typescript` to `Javascript` is realized in this command, it must be done manually.
+
+### `npm run copyfiles`
+
+Copy all not `*.ts*` files into `./dist` directory.
 
 ### `npm run full-rebuild`
 

@@ -1,5 +1,6 @@
 {
+	"ignore": ["**/swagger.json", "**/routes.ts"],
 	"watch": ["./src"],
 	"ext": "ts",
-	"exec": "npm run lint && npm run ts-start"
+	"exec": "npm run tsoa && npm run lint && npm run ts-start"
 }
