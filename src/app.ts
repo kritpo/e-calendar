@@ -26,7 +26,11 @@ app.use(bodyParser.json());
 
 app.use(
 	morgan(
-		'[:date[iso]] :status - :method :url - :res[content-length] o - :response-time ms'
+		'[:date[iso]] :status - :method :url - :res[content-length] o - :response-time ms',
+		{
+			/* eslint-disable jsdoc/require-jsdoc */
+			skip: () => process.env.NODE_ENV === 'test'
+		}
 	)
 );
 
