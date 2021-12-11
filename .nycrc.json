@@ -1,4 +1,6 @@
 {
 	"extends": "@istanbuljs/nyc-config-typescript",
-	"check-coverage": true
+	"check-coverage": true,
+	"exclude": ["**/routes.ts", "**/*.spec.ts"],
+	"reporter": ["text", "lcov"]
 }

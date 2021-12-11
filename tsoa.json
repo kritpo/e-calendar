@@ -1,0 +1,28 @@
+{
+	"spec": {
+		"outputDirectory": "./src/public",
+		"host": "localhost:8080",
+		"specVersion": 3,
+		"name": "E-Calendar",
+		"securityDefinitions": {
+			"jwt": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT",
+				"description": "Access token retrieved on authentication endpoint."
+			}
+		},
+		"schemes": ["http"]
+	},
+	"routes": {
+		"routesDir": "./src/utils/tsoa",
+		"middleware": "express",
+		"noWriteIfUnchanged": true,
+		"iocModule": "./src/utils/tsoa/ioc.ts",
+		"authentificationModule": "./src/utils/tsoa/authentification.ts",
+		"useSuccessResponseCode": true
+	},
+	"entryFile": "./src/index.ts",
+	"controllerPathGlobs": ["./src/**/*Controller.ts"],
+	"noImplicitAdditionalProperties": "throw-on-extras"
+}

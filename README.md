@@ -6,8 +6,8 @@
 Fully functional calendar API in Express.
 
 ![Continuous Integration](https://github.com/kritpo/e-calendar/actions/workflows/ci.yml/badge.svg?branch=main)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/9854bf55cd9291f58c59/test_coverage)](https://codeclimate.com/github/kritpo/e-calendar/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9854bf55cd9291f58c59/maintainability)](https://codeclimate.com/github/kritpo/e-calendar/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/161c5976566eadcb9893/test_coverage)](https://codeclimate.com/github/kritpo/e-calendar/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/161c5976566eadcb9893/maintainability)](https://codeclimate.com/github/kritpo/e-calendar/maintainability)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 </div>
@@ -45,7 +45,6 @@ MONGODB_PORT=27020
 MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
-NODE_ENV=development
 PORT=8080
 ```
 
@@ -60,7 +59,6 @@ MONGODB_PORT=27020
 MONGODB_DATABASE=e_calendar_test
 
 ### E-Calendar ###
-NODE_ENV=test
 PORT=8081
 ```
 
@@ -75,7 +73,6 @@ MONGODB_PORT=27017
 MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
-NODE_ENV=production
 PORT=8090
 ```
 
@@ -143,6 +140,13 @@ No generation from librairies is realized in this command, it must be done manua
 
 Check and fix all `Typescript` errors in the code.
 
+### `npm run tsoa`
+
+Generate all necessary files of `TSOA`.\
+It mainly generate documentation and routes specification.
+
+All generated files are directly put into subfolders of `./src` directory.
+
 ### `npm run build`
 
 Transpiled `Typescript` source code into `Javascript` code.
@@ -160,6 +164,10 @@ Should be used with `npm run build`
 Launches the test runner from pre-transpiled code with coverage support.
 
 No transpilation from `Typescript` to `Javascript` is realized in this command, it must be done manually.
+
+### `npm run copyfiles`
+
+Copy all not `*.ts*` files into `./dist` directory.
 
 ### `npm run full-rebuild`
 

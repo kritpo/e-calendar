@@ -13,11 +13,12 @@ jobs:
             - name: create .env files
               uses: SpicyPizza/create-envfile@v1
               with:
-                  MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-                  MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
-                  MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
-                  MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
-                  MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+                  envkey_MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+                  envkey_MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+                  envkey_MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
+                  envkey_MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
+                  envkey_MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+                  file_name: .env
 
             - name: start dependencies containers
               run: docker-compose -f ./resources/docker-compose.yml up -d

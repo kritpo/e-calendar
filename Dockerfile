@@ -5,6 +5,7 @@ WORKDIR /usr/src/e-calendar
 COPY package.json ./
 COPY package-lock.json ./
 COPY tsconfig.json ./
+COPY tsoa.json ./
 COPY src ./src
 
 RUN npm ci

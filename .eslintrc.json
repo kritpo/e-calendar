@@ -146,7 +146,24 @@
 		"no-duplicate-imports": "off" /* avoid rule conflict */,
 		"@typescript-eslint/no-duplicate-imports": "error",
 		"no-unused-expressions": "off" /* avoid rule conflict */,
-		"@typescript-eslint/no-unused-expressions": "error"
+		"@typescript-eslint/no-unused-expressions": "error",
+
+		/* JSDoc */
+		"jsdoc/require-description": "error",
+		"jsdoc/require-jsdoc": [
+			"error",
+			{
+				"require": {
+					"ArrowFunctionExpression": true,
+					"ClassExpression": true,
+					"FunctionDeclaration": true,
+					"FunctionExpression": true,
+					"MethodDefinition": true
+				}
+			}
+		],
+		"jsdoc/require-param-type": "off",
+		"jsdoc/require-returns-type": "off"
 	},
 	"overrides": [
 		{
