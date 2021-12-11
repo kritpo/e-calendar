@@ -6,8 +6,8 @@
 Fully functional calendar API in Express.
 
 ![Continuous Integration](https://github.com/kritpo/e-calendar/actions/workflows/ci.yml/badge.svg?branch=main)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/9854bf55cd9291f58c59/test_coverage)](https://codeclimate.com/github/kritpo/e-calendar/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9854bf55cd9291f58c59/maintainability)](https://codeclimate.com/github/kritpo/e-calendar/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/161c5976566eadcb9893/test_coverage)](https://codeclimate.com/github/kritpo/e-calendar/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/161c5976566eadcb9893/maintainability)](https://codeclimate.com/github/kritpo/e-calendar/maintainability)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 </div>
