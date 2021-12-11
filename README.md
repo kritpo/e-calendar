@@ -45,7 +45,6 @@ MONGODB_PORT=27020
 MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
-NODE_ENV=development
 PORT=8080
 ```
 
@@ -60,7 +59,6 @@ MONGODB_PORT=27020
 MONGODB_DATABASE=e_calendar_test
 
 ### E-Calendar ###
-NODE_ENV=test
 PORT=8081
 ```
 
@@ -75,7 +73,6 @@ MONGODB_PORT=27017
 MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
-NODE_ENV=production
 PORT=8090
 ```
 

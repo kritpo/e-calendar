@@ -12,6 +12,12 @@ chai.use(chaiAsPromised);
 chai.use(dirtyChai);
 chai.use(sinonChai);
 
+/**
+ * chai's should command
+ */
 export const itShould = chai.should();
 
+/**
+ * prepared supertest request
+ */
 export const appRequest = supertest(app);
