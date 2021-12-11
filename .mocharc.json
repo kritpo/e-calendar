@@ -1,0 +1,6 @@
+{
+	"exit": true,
+	"recursive": true,
+	"require": ["./dist/setupTest.js"],
+	"spec": "./dist/**/*.spec.js"
+}

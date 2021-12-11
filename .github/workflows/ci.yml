@@ -1,0 +1,46 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: checkout code
+              uses: actions/checkout@v2
+
+            - name: create .env files
+              uses: SpicyPizza/create-envfile@v1
+              with:
+                  MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+                  MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+                  MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
+                  MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
+                  MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+
+            - name: start dependencies containers
+              run: docker-compose -f ./resources/docker-compose.yml up -d
+
+            - name: install node
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 16
+
+            - name: install dependencies
+              run: npm ci
+
+            - name: build
+              run: npm run full-rebuild
+
+            - name: test and coverage
+              uses: paambaati/codeclimate-action@v3.0.0
+              env:
+                  CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_REPORTER_ID }}
+              with:
+                  coverageCommand: npm test
+                  debug: true
+
+            - name: stop dependencies containers
+              if: always()
+              run: docker-compose -f ./resources/docker-compose.yml down

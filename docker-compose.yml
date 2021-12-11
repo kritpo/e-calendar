@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+    mongodb:
+        image: mongo
+        restart: always
+        env_file:
+            - '.env.production'
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: '${MONGODB_USERNAME}'
+            MONGO_INITDB_ROOT_PASSWORD: '${MONGODB_PASSWORD}'
+        ports:
+            - '${MONGODB_PORT}:27017'
+        volumes:
+            - mongodb_data:/data/db
+
+    app:
+        build: .
+        restart: always
+        env_file:
+            - '.env.production'
+        environment:
+            HOST_PORT: '${PORT}'
+            PORT: '80'
+        ports:
+            - '${HOST_PORT:-8080}:80'
+        external_links:
+            - mongodb
+        depends_on:
+            - mongodb
+
+volumes:
+    mongodb_data:

@@ -1,0 +1,7 @@
+# generated files
+.nyc_output/
+coverage/
+dist/
+
+### NPM generated files ###
+**/package-lock.json

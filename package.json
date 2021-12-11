@@ -1,0 +1,72 @@
+{
+	"name": "e-calendar",
+	"version": "1.0.0",
+	"description": "Fully functional calendar API in Express",
+	"keywords": [
+		"calendar",
+		"api",
+		"express",
+		"efrei paris"
+	],
+	"homepage": "https://github.com/kritpo/e-calender#readme",
+	"bugs": {
+		"url": "https://github.com/kritpo/e-calendar/issues"
+	},
+	"license": "MIT",
+	"author": "Jimmy WENG <jimmy.weng@efrei.net>",
+	"contributors": [
+		"Lucas BRIERE <lucas.briere@efrei.net>",
+		"James JIN <james.jin@efrei.net>",
+		"Jimmy WENG <jimmy.weng@efrei.net>"
+	],
+	"main": "./dist/index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kritpo/e-calendar"
+	},
+	"scripts": {
+		"start": "node ./dist/index.js",
+		"ts-start": "cross-env NODE_ENV=development ts-node ./src/index.ts",
+		"lint": "eslint --fix ./src",
+		"build": "tsc",
+		"clean": "rimraf ./dist/**/*",
+		"test": "cross-env NODE_ENV=test nyc mocha",
+		"full-rebuild": "npm run clean && npm run lint && npm run build",
+		"full-start": "npm run full-rebuild && cross-env NODE_ENV=production npm start",
+		"test-watch": "nodemon -x \"npm run full-rebuild && npm test\"",
+		"dev": "nodemon"
+	},
+	"dependencies": {
+		"dotenv": "^10.0.0"
+	},
+	"devDependencies": {
+		"@istanbuljs/nyc-config-typescript": "^1.0.2",
+		"@types/chai": "^4.3.0",
+		"@types/chai-as-promised": "^7.1.4",
+		"@types/dirty-chai": "^2.0.2",
+		"@types/mocha": "^9.0.0",
+		"@types/node": "^16.11.12",
+		"@types/sinon": "^10.0.6",
+		"@types/sinon-chai": "^3.2.6",
+		"@typescript-eslint/eslint-plugin": "^5.6.0",
+		"@typescript-eslint/parser": "^5.6.0",
+		"chai": "^4.3.4",
+		"chai-as-promised": "^7.1.1",
+		"cross-env": "^7.0.3",
+		"dirty-chai": "^2.0.1",
+		"eslint": "^8.4.1",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-jsdoc": "^37.2.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"mocha": "^9.1.3",
+		"nodemon": "^2.0.15",
+		"nyc": "^15.1.0",
+		"prettier": "^2.5.1",
+		"rimraf": "^3.0.2",
+		"sinon": "^12.0.1",
+		"sinon-chai": "^3.7.0",
+		"source-map-support": "^0.5.21",
+		"ts-node": "^10.4.0",
+		"typescript": "^4.5.3"
+	}
+}

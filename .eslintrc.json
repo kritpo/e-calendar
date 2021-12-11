@@ -1,0 +1,161 @@
+{
+	"root": true,
+	"env": {
+		"node": true
+	},
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint"],
+	"parserOptions": {
+		"project": "./tsconfig.json"
+	},
+	"extends": [
+		"eslint:recommended",
+		"plugin:jsdoc/recommended",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/recommended-requiring-type-checking",
+		"plugin:prettier/recommended"
+	],
+	"rules": {
+		/* maintainability */
+		"max-lines": [
+			"error",
+			{ "max": 300, "skipBlankLines": true, "skipComments": true }
+		],
+		"max-lines-per-function": [
+			"error",
+			{ "max": 50, "skipBlankLines": true, "skipComments": true }
+		],
+
+		/* code security */
+		"no-unmodified-loop-condition": "error",
+		"no-unreachable-loop": "error",
+		"no-unused-private-class-members": "error",
+		"curly": "error",
+		"eqeqeq": "error",
+
+		/* stylistic */
+		"capitalized-comments": [
+			"error",
+			"never",
+			{
+				"ignorePattern": "ANCHOR|TODO|NOTE|REVIEW|FIXME|STUB"
+			}
+		],
+		"multiline-comment-style": "error",
+		"no-else-return": "error",
+		"no-inline-comments": "error",
+		"no-lonely-if": "error",
+		"arrow-spacing": "error",
+
+		/* typescript */
+		"@typescript-eslint/array-type": "error",
+		"@typescript-eslint/consistent-type-definitions": [
+			"error",
+			"interface"
+		],
+		"@typescript-eslint/explicit-function-return-type": "error",
+		"@typescript-eslint/no-require-imports": "error",
+
+		/* typescript code security */
+		"no-use-before-define": "off" /* avoid rule conflict */,
+		"@typescript-eslint/no-use-before-define": "error",
+
+		/* typescript stylistic */
+		"camelcase": "off" /* avoid rule conflict */,
+		"@typescript-eslint/naming-convention": [
+			"error",
+			{
+				"selector": "default",
+				"filter": {
+					"regex": "_",
+					"match": false
+				},
+				"format": ["camelCase"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "typeLike",
+				"format": ["PascalCase"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "variable",
+				"format": ["camelCase"],
+				"leadingUnderscore": "allow",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "variable",
+				"modifiers": ["const"],
+				"format": ["camelCase", "UPPER_CASE"],
+				"leadingUnderscore": "allow",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "classProperty",
+				"modifiers": ["private"],
+				"format": ["camelCase"],
+				"leadingUnderscore": "require",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "parameterProperty",
+				"modifiers": ["private"],
+				"format": ["camelCase"],
+				"leadingUnderscore": "require",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "classMethod",
+				"modifiers": ["private"],
+				"format": ["camelCase"],
+				"leadingUnderscore": "require",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "enumMember",
+				"format": ["UPPER_CASE"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore": "forbid"
+			},
+			{
+				"selector": "interface",
+				"format": ["PascalCase"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore": "forbid",
+				"prefix": ["I"]
+			},
+			{
+				"selector": "enum",
+				"format": ["PascalCase"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore": "forbid",
+				"suffix": ["Enum"]
+			}
+		],
+		"brace-style": "off" /* avoid rule conflict */,
+		"@typescript-eslint/brace-style": "error",
+		"comma-spacing": "off" /* avoid rule conflict */,
+		"@typescript-eslint/comma-spacing": "error",
+		"dot-notation": "off" /* avoid rule conflict */,
+		"@typescript-eslint/dot-notation": "error",
+		"func-call-spacing": "off" /* avoid rule conflict */,
+		"@typescript-eslint/func-call-spacing": "error",
+		"no-duplicate-imports": "off" /* avoid rule conflict */,
+		"@typescript-eslint/no-duplicate-imports": "error",
+		"no-unused-expressions": "off" /* avoid rule conflict */,
+		"@typescript-eslint/no-unused-expressions": "error"
+	},
+	"overrides": [
+		{
+			/* test files */
+			"files": ["**/*.spec.ts"],
+			"rules": {
+				"max-lines": "off",
+				"max-lines-per-function": "off"
+			}
+		}
+	]
+}
