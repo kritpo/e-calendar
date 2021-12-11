@@ -121,6 +121,14 @@
 				"trailingUnderscore": "forbid"
 			},
 			{
+				"selector": "class",
+				"modifiers": ["abstract"],
+				"format": ["PascalCase"],
+				"leadingUnderscore": "forbid",
+				"trailingUnderscore": "forbid",
+				"prefix": ["Abstract"]
+			},
+			{
 				"selector": "interface",
 				"format": ["PascalCase"],
 				"leadingUnderscore": "forbid",
