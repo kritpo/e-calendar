@@ -1,18 +1,11 @@
-import { ILogger } from './ILogger';
+import { AbstractLogger } from './AbstractLogger';
 import { formatLog } from './formatLog';
 import { LoggingLevelEnum } from './types';
 
 /**
  * development mode logger
  */
-export class DevLogger implements ILogger {
-	/**
-	 * create a logger
-	 *
-	 * @param _origin origin of the logger
-	 */
-	constructor(private _origin: string) {}
-
+export class DevLogger extends AbstractLogger {
 	/**
 	 * log a message
 	 *
@@ -39,54 +32,5 @@ export class DevLogger implements ILogger {
 		if (level === LoggingLevelEnum.FATAL) {
 			process.exit(1);
 		}
-	}
-
-	/**
-	 * log a debug message
-	 *
-	 * @param message log message
-	 * @param err log error
-	 */
-	debug(message: string, err?: Error): void {
-		this.log(LoggingLevelEnum.DEBUG, message, err);
-	}
-
-	/**
-	 * log a info message
-	 *
-	 * @param message log message
-	 */
-	info(message: string): void {
-		this.log(LoggingLevelEnum.INFO, message);
-	}
-
-	/**
-	 * log a warning message
-	 *
-	 * @param message log message
-	 * @param err log error
-	 */
-	warn(message: string, err?: Error): void {
-		this.log(LoggingLevelEnum.WARN, message, err);
-	}
-
-	/**
-	 * log a error message
-	 *
-	 * @param message log message
-	 * @param err log error
-	 */
-	error(message: string, err?: Error): void {
-		this.log(LoggingLevelEnum.ERROR, message, err);
-	}
-
-	/**
-	 * log a fatal message
-	 *
-	 * @param message log message
-	 * @param err log error
-	 */
-	fatal(message: string, err?: Error): void {
-		this.log(LoggingLevelEnum.FATAL, message, err);
 	}
 }
