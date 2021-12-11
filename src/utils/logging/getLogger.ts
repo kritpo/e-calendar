@@ -1,7 +1,7 @@
 import { getEnv } from '../getEnv';
-import { DevLogger } from './DevLogger';
-import { ILogger } from './ILogger';
-import { ProdLogger } from './ProdLogger';
+import { ILogger } from './interfaces/ILogger';
+import { DevLogger } from './models/DevLogger';
+import { ProdLogger } from './models/ProdLogger';
 
 /**
  * get a logger environment dependent

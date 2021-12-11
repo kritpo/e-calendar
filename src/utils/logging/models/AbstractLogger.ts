@@ -1,5 +1,5 @@
-import { ILogger } from './ILogger';
-import { LoggingLevelEnum } from './types';
+import { ILogger } from '../interfaces/ILogger';
+import { LoggingLevelEnum } from '../types';
 
 /**
  * logger base

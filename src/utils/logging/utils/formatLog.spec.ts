@@ -1,5 +1,5 @@
+import { LoggingLevelEnum } from '../types';
 import { formatLog } from './formatLog';
-import { LoggingLevelEnum } from './types';
 
 describe('formatLog', () => {
 	it('debug', function () {

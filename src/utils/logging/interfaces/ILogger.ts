@@ -1,4 +1,4 @@
-import { LoggingLevelEnum } from './types';
+import { LoggingLevelEnum } from '../types';
 
 /**
  * generic logger structure

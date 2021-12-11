@@ -1,5 +1,5 @@
+import { LoggingLevelEnum } from '../types';
 import { AbstractLogger } from './AbstractLogger';
-import { LoggingLevelEnum } from './types';
 
 interface ILogError {
 	name: string;

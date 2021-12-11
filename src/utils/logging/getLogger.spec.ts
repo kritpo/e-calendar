@@ -1,6 +1,6 @@
-import { DevLogger } from './DevLogger';
-import { ProdLogger } from './ProdLogger';
 import { getLogger } from './getLogger';
+import { DevLogger } from './models/DevLogger';
+import { ProdLogger } from './models/ProdLogger';
 
 describe('getLogger', () => {
 	let currentNodeEnv: string | undefined;

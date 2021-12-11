@@ -1,6 +1,6 @@
+import { LoggingLevelEnum } from '../types';
+import { formatLog } from '../utils/formatLog';
 import { AbstractLogger } from './AbstractLogger';
-import { formatLog } from './formatLog';
-import { LoggingLevelEnum } from './types';
 
 /**
  * development mode logger

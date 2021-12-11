@@ -1,4 +1,4 @@
-import { LoggingLevelEnum } from './types';
+import { LoggingLevelEnum } from '../types';
 
 /**
  * format log depending on the level
