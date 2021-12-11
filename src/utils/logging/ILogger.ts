@@ -1,5 +1,8 @@
 import { LoggingLevelEnum } from './types';
 
+/**
+ * generic logger structure
+ */
 export interface ILogger {
 	log(level: LoggingLevelEnum, message: string, err?: Error): void;
 
