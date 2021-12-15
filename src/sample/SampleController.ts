@@ -2,6 +2,9 @@ import { Controller, Get, Path, Route } from 'tsoa';
 
 // STUB: to replace
 
+/**
+ * sample controller
+ */
 @Route('/sample')
 export class SampleController extends Controller {
 	/**
