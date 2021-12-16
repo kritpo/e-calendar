@@ -2,6 +2,10 @@ FROM node:16-alpine as tsc-builder
 
 WORKDIR /usr/src/e-calendar
 
+COPY .eslintignore ./
+COPY .eslintrc.json ./
+COPY .prettierignore ./
+COPY .prettierrc.json ./
 COPY package.json ./
 COPY package-lock.json ./
 COPY tsconfig.json ./
