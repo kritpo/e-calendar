@@ -20,18 +20,8 @@ jobs:
                   envkey_MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
                   file_name: .env
 
-            - name: create resources .env files
-              uses: SpicyPizza/create-envfile@v1
-              with:
-                  envkey_MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-                  envkey_MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
-                  envkey_MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
-                  envkey_MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
-                  envkey_MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
-                  file_name: resources/.env
-
             - name: start dependencies containers
-              run: docker-compose -f ./resources/docker-compose.yml up -d
+              run: docker-compose -f ./resources/docker-compose.yml --env-file .env up -d
 
             - name: install node
               uses: actions/setup-node@v2
