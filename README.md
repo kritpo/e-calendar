@@ -34,7 +34,7 @@ git clone git@github.com:kritpo/e-calendar.git
 
 **_To use it with Docker, you only need to set-up the `production` file and skip to `Start Application` > `Start in production mode with Docker` part_**
 
-Create for `development` in `.env` and in `resources/.env`:
+Create for `development` in `.env`:
 
 ```env
 ### MongoDB ###
@@ -86,7 +86,7 @@ npm install
 
 ```sh
 cd ./resources
-docker-compose up
+docker-compose --env-file ../.env up
 
 # the rest of commands need to be executed in the root directory
 cd ..
