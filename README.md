@@ -46,6 +46,9 @@ MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
 PORT=8080
+SEED={a random seed}
+ACCESS_TOKEN_EXPIRES_MINUTES=2
+REFRESH_TOKEN_EXPIRES_MINUTES=10
 ```
 
 Create for `test` in `.env.test`:
@@ -60,6 +63,9 @@ MONGODB_DATABASE=e_calendar_test
 
 ### E-Calendar ###
 PORT=8081
+SEED={a random seed}
+ACCESS_TOKEN_EXPIRES_MINUTES=2
+REFRESH_TOKEN_EXPIRES_MINUTES=10
 ```
 
 Create for `production` in `.env.production`:
@@ -74,6 +80,9 @@ MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
 PORT=8090
+SEED={a random seed}
+ACCESS_TOKEN_EXPIRES_MINUTES=2
+REFRESH_TOKEN_EXPIRES_MINUTES=10
 ```
 
 ### `Install Dependencies`
