@@ -2,11 +2,8 @@ import crypto from 'crypto';
 
 import sha1 from 'crypto-js/sha1';
 import { addMinutes, isAfter, isBefore } from 'date-fns';
-import { HydratedDocument, ObjectId } from 'mongoose';
 import { singleton } from 'tsyringe';
 
-import { IUser } from '../../User/User';
-import { getDocumentId } from '../getDocumentId';
 import { getEnv } from '../getEnv';
 import { getLogger } from '../logging/getLogger';
 
@@ -17,16 +14,12 @@ interface IToken {
 	expires: Date;
 }
 
-interface ISecurityTokens {
+export interface ISecurityTokens {
 	accessToken: IToken;
 	refreshToken: IToken;
 }
 
-interface ISecurityData extends ISecurityTokens {
-	userId: ObjectId;
-}
-
-type SecurityStoreType = Record<string, ISecurityData>;
+type SecurityStoreType = Record<string, ISecurityTokens>;
 
 /**
  * security management service
@@ -83,31 +76,30 @@ export class SecurityService {
 	 * @param accessToken the access token
 	 * @returns the user id or null if not exist
 	 */
-	public getUserIDFromAccessToken(accessToken: string): ObjectId | null {
-		const securityData = Object.values(this._securityStore).filter(
-			(data) =>
+	public getUserIDFromAccessToken(accessToken: string): string | null {
+		const securityData = Object.entries(this._securityStore).filter(
+			([, data]) =>
 				data.accessToken.token === accessToken &&
 				isBefore(new Date(), data.accessToken.expires)
 		);
 
-		return securityData.length === 1 ? securityData[0].userId : null;
+		return securityData.length === 1 ? securityData[0][0] : null;
 	}
 
 	/**
 	 * create new tokens for the user
 	 *
-	 * @param user the user associated to the tokens to create
+	 * @param userId the user id
 	 * @returns the created tokens
 	 */
-	public createToken(user: HydratedDocument<IUser>): ISecurityTokens {
+	public createToken(userId: string): ISecurityTokens {
 		const securityTokens = this._generateSecurityTokens();
 
-		this._securityStore[user.username] = {
-			userId: getDocumentId(user),
+		this._securityStore[userId] = {
 			...securityTokens
 		};
 
-		LOGGER.info(`${user.username} tokens are created`);
+		LOGGER.info(`${userId} tokens are created`);
 
 		return securityTokens;
 	}
@@ -115,34 +107,33 @@ export class SecurityService {
 	/**
 	 * refresh the user access token
 	 *
-	 * @param username the username of the user
+	 * @param userId the user id
 	 * @param refreshToken the refresh token associated to the user
 	 * @returns the newly created tokens or null if refresh token is wrong
 	 */
 	public updateAccessTokenToken(
-		username: string,
+		userId: string,
 		refreshToken: string
 	): ISecurityTokens | null {
-		const token = this._securityStore[username].refreshToken;
+		const token = this._securityStore[userId].refreshToken;
 
 		if (
 			token === undefined ||
 			token.token !== refreshToken ||
 			isAfter(new Date(), token.expires)
 		) {
-			LOGGER.info(`Wrong refresh token were given for ${username}`);
+			LOGGER.info(`Wrong refresh token were given for ${userId}`);
 
 			return null;
 		}
 
 		const securityTokens = this._generateSecurityTokens();
 
-		this._securityStore[username] = {
-			...this._securityStore[username],
+		this._securityStore[userId] = {
 			...securityTokens
 		};
 
-		LOGGER.info(`${username} tokens are renewed`);
+		LOGGER.info(`${userId} tokens are renewed`);
 
 		return securityTokens;
 	}

@@ -46,6 +46,7 @@ MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
 PORT=8080
+JWT_SECRET={a random secret}
 SEED={a random seed}
 ACCESS_TOKEN_EXPIRES_MINUTES=2
 REFRESH_TOKEN_EXPIRES_MINUTES=10
@@ -63,6 +64,7 @@ MONGODB_DATABASE=e_calendar_test
 
 ### E-Calendar ###
 PORT=8081
+JWT_SECRET={a random secret}
 SEED={a random seed}
 ACCESS_TOKEN_EXPIRES_MINUTES=2
 REFRESH_TOKEN_EXPIRES_MINUTES=10
@@ -80,6 +82,7 @@ MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
 PORT=8090
+JWT_SECRET={a random secret}
 SEED={a random seed}
 ACCESS_TOKEN_EXPIRES_MINUTES=2
 REFRESH_TOKEN_EXPIRES_MINUTES=10

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
-import { getDocumentId } from '../utils/getDocumentId';
+import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import { SecurityService } from '../utils/security/SecurityService';
 import { IUser, PublicUserType, User } from './User';

@@ -1,53 +1,81 @@
 import * as express from 'express';
 import * as jwt from 'jsonwebtoken';
+import { container } from 'tsyringe';
 
-// STUB: to replace
+import { PublicUserType } from '../../User/User';
+import { UserService } from '../../User/UserService';
+import { getEnv } from '../getEnv';
+import { getLogger } from '../logging/getLogger';
+import { SecurityService } from '../security/SecurityService';
+
+const LOGGER = getLogger('expressAuthentication');
+
+const catchUnauthenticated = (): undefined => {
+	LOGGER.info('No authentication');
+
+	return undefined;
+};
 
 /**
  * /!\ ONLY FOR TSOA USAGE /!\
  *
- * @param {express.Request} request request object
- * @param {string} securityName name of the security definition
- * @param {string[]} scopes requested scopes
- * @returns {Promise<boolean>} connection status
+ * @param request request object
+ * @param securityName name of the security definition
+ * @returns authenticated user data
  */
 export const expressAuthentication = (
 	request: express.Request,
-	securityName: string,
-	scopes?: string[]
-): Promise<boolean> => {
+	securityName: string
+): Promise<PublicUserType | undefined> => {
 	if (securityName === 'jwt') {
 		const authorization = request.headers.authorization?.split(' ');
 
-		if (authorization && authorization[0] === 'Bearer') {
-			return new Promise((resolve, reject) => {
-				const token = authorization[1];
+		if (
+			authorization &&
+			authorization[0] === 'Bearer' &&
+			authorization[1]
+		) {
+			const token = authorization[1];
 
-				if (!token) {
-					reject(new Error('No token provided'));
-				}
+			return new Promise((resolve) => {
+				const secret = getEnv('JWT_SECRET');
 
-				jwt.verify(token, '[SECRET]', function (err, decoded) {
-					if (err) {
-						reject(err);
-					} else {
-						for (const scope of scopes ?? []) {
-							if (
-								!(decoded?.scopes as string[])?.includes(scope)
-							) {
-								reject(
-									new Error(
-										'JWT does not contain required scope.'
-									)
-								);
-							}
+				jwt.verify(token, secret, function (err, token) {
+					if (err === null && token !== undefined) {
+						const securityService =
+							container.resolve(SecurityService);
+						const userId = securityService.getUserIDFromAccessToken(
+							token.accessToken as string
+						);
+
+						if (userId !== null) {
+							const userService = container.resolve(UserService);
+							userService
+								.getById(userId)
+								.then((user) => {
+									if (user !== null) {
+										LOGGER.info(
+											`${userId} is authenticated`
+										);
+
+										resolve(user);
+									} else {
+										throw new Error(
+											'The user does not exist'
+										);
+									}
+								})
+								.catch(() => {
+									resolve(catchUnauthenticated());
+								});
 						}
-						resolve(true);
 					}
+
+					resolve(catchUnauthenticated());
 				});
 			});
 		}
 	}
 
-	return Promise.reject(new Error('No authentication credentials'));
+	return Promise.resolve(catchUnauthenticated());
 };
