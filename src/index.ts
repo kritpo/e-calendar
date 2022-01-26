@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import dotenv from 'dotenv';
 
 import { app } from './app';
-import { dbConnect } from './utils/dbConnect';
+import { dbConnect } from './utils/db/dbConnect';
 import { getEnv } from './utils/getEnv';
 import { getLogger } from './utils/logging/getLogger';
 
