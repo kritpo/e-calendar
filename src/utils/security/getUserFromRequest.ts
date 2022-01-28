@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import { PublicUserType } from '../../User/User';
+import { IPublicUser } from '../../User/User';
 
 /**
  * retrieve the user from the request
@@ -10,6 +10,6 @@ import { PublicUserType } from '../../User/User';
  */
 export const getUserFromRequest = (
 	req: express.Request
-): PublicUserType | undefined => {
-	return (req as { user?: PublicUserType }).user;
+): IPublicUser | undefined => {
+	return (req as { user?: IPublicUser }).user;
 };

@@ -23,7 +23,7 @@ import {
 	ISecurityTokens,
 	SecurityService
 } from '../utils/security/SecurityService';
-import { IUser, PublicUserType } from './User';
+import { IPublicUser, IUser } from './User';
 import { UserService } from './UserService';
 
 interface ITokenBody {
@@ -55,8 +55,8 @@ export class UserController extends Controller {
 		notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		notFoundResponse: TsoaResponse<404, IErrorResponse>,
-		user: PublicUserType | null,
-		reqUser?: PublicUserType
+		user: IPublicUser | null,
+		reqUser?: IPublicUser
 	): Promise<T> {
 		if (user === null) {
 			return generateErrorResponse<404, T>(
@@ -102,7 +102,7 @@ export class UserController extends Controller {
 	 * @returns List of users
 	 */
 	@Get('/')
-	public async getAll(): Promise<PublicUserType[]> {
+	public async getAll(): Promise<IPublicUser[]> {
 		return this._userService.getAll();
 	}
 
@@ -115,7 +115,7 @@ export class UserController extends Controller {
 	 * @returns Created user
 	 */
 	@Post('/register')
-	public async register(@Body() userBody: IUser): Promise<PublicUserType> {
+	public async register(@Body() userBody: IUser): Promise<IPublicUser> {
 		this.setStatus(201);
 
 		return this._userService.insertUserByUsernameAndPassword(
@@ -213,11 +213,11 @@ export class UserController extends Controller {
 	public async getUser(
 		@Path() userId: string,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<PublicUserType> {
+	): Promise<IPublicUser> {
 		const user = await this._userService.getById(userId);
 
 		if (user === null) {
-			return generateErrorResponse<404, PublicUserType>(
+			return generateErrorResponse<404, IPublicUser>(
 				notFoundResponse,
 				404,
 				'Not Found'

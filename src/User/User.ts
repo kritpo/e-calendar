@@ -1,7 +1,10 @@
 import { Schema, model } from 'mongoose';
 
-export interface IUser {
+interface IBaseUser {
 	username: string;
+}
+
+export interface IUser extends IBaseUser {
 	password: string;
 }
 const userSchema = new Schema<IUser>({
@@ -11,4 +14,6 @@ const userSchema = new Schema<IUser>({
 
 export const User = model('User', userSchema);
 
-export type PublicUserType = { id: string } & Omit<IUser, 'password'>;
+export interface IPublicUser extends IBaseUser {
+	id: string;
+}

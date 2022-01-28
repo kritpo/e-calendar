@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { container } from 'tsyringe';
 
-import { PublicUserType } from '../../User/User';
+import { IPublicUser } from '../../User/User';
 import { UserService } from '../../User/UserService';
 import { getLogger } from '../logging/getLogger';
 import { SecurityService } from '../security/SecurityService';
@@ -25,7 +25,7 @@ export const expressAuthentication: (
 	request: express.Request,
 	securityName: string,
 	_: unknown
-) => Promise<PublicUserType | undefined> = async (request, securityName) => {
+) => Promise<IPublicUser | undefined> = async (request, securityName) => {
 	if (securityName === 'token') {
 		const authorization = request.headers.authorization?.split(' ');
 

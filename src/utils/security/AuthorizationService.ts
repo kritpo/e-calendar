@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 
-import { PublicUserType } from '../../User/User';
+import { IPublicUser } from '../../User/User';
 
 /**
  * authorization management service
@@ -14,10 +14,7 @@ export class AuthorizationService {
 	 * @param askedUser the user object to verify authorizations
 	 * @returns if the user is authorized to do actions on user
 	 */
-	public isUserSelf(
-		user: PublicUserType,
-		askedUser: PublicUserType
-	): boolean {
+	public isUserSelf(user: IPublicUser, askedUser: IPublicUser): boolean {
 		return user.id === askedUser.id;
 	}
 }

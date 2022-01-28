@@ -4,7 +4,7 @@ import { injectable, singleton } from 'tsyringe';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import { SecurityService } from '../utils/security/SecurityService';
-import { IUser, PublicUserType, User } from './User';
+import { IPublicUser, IUser, User } from './User';
 
 const LOGGER = getLogger('UserService');
 
@@ -31,7 +31,7 @@ export class UserService {
 	public async insertUserByUsernameAndPassword(
 		username: string,
 		plainPassword: string
-	): Promise<PublicUserType> {
+	): Promise<IPublicUser> {
 		const password = this._securityService.hashPassword(plainPassword);
 		const userData: IUser = { username, password };
 
@@ -48,7 +48,7 @@ export class UserService {
 	 *
 	 * @returns all users
 	 */
-	public async getAll(): Promise<PublicUserType[]> {
+	public async getAll(): Promise<IPublicUser[]> {
 		const users = await User.find().exec();
 
 		LOGGER.info(`${users.length} users is retrieved`);
@@ -69,9 +69,9 @@ export class UserService {
 	public async getByUsernameAndPassword(
 		username: string,
 		plainPassword: string
-	): Promise<PublicUserType | null> {
+	): Promise<IPublicUser | null> {
 		const password = this._securityService.hashPassword(plainPassword);
-		const userData: IUser = { username, password };
+		const userData = { username, password };
 
 		const users = await User.find(userData).exec();
 		const user = users[0];
@@ -93,7 +93,7 @@ export class UserService {
 	 * @param userId the id of the user
 	 * @returns the found user
 	 */
-	public async getById(userId: string): Promise<PublicUserType | null> {
+	public async getById(userId: string): Promise<IPublicUser | null> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
 		if (user !== null) {
