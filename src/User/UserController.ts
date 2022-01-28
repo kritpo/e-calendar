@@ -43,8 +43,8 @@ export class UserController extends Controller {
 	 * generate response
 	 *
 	 * @param cb the main response function
-	 * @param notAuthenticatedResponse Not authenticated
-	 * @param notAuthorizedResponse Not authorized
+	 * @param notAuthenticatedResponse Not Authenticated
+	 * @param notAuthorizedResponse Not Authorized
 	 * @param notFoundResponse Content not found
 	 * @param user the user to access
 	 * @param reqUser the user who access to ressource
@@ -112,10 +112,24 @@ export class UserController extends Controller {
 	 * @param userBody the user data
 	 * @param userBody.username the user username
 	 * @param userBody.password the user plain password
+	 * @param conflictResponse Conflict
 	 * @returns Created user
 	 */
 	@Post('/register')
-	public async register(@Body() userBody: IUser): Promise<IPublicUser> {
+	public async register(
+		@Body() userBody: IUser,
+		@Res() conflictResponse: TsoaResponse<409, IErrorResponse>
+	): Promise<IPublicUser> {
+		const user = await this._userService.getByUsername(userBody.username);
+
+		if (user !== null) {
+			return generateErrorResponse<409, IPublicUser>(
+				conflictResponse,
+				409,
+				'Conflict'
+			);
+		}
+
 		this.setStatus(201);
 
 		return this._userService.insertUserByUsernameAndPassword(
@@ -130,7 +144,7 @@ export class UserController extends Controller {
 	 * @param userBody the user credentials
 	 * @param userBody.username the user username
 	 * @param userBody.password the user plain password
-	 * @param notAuthenticatedResponse Not authenticated
+	 * @param notAuthenticatedResponse Not Authenticated
 	 * @returns Logged user tokens
 	 */
 	@Post('/login')
@@ -161,9 +175,9 @@ export class UserController extends Controller {
 	 * @param tokenBody the refresh token
 	 * @param tokenBody.refreshToken the refresh token
 	 * @param req the express request
-	 * @param notAuthenticatedResponse Not authenticated
-	 * @param notAuthorizedResponse Not authorized
-	 * @param notFoundResponse Content not found
+	 * @param notAuthenticatedResponse Not Authenticated
+	 * @param notAuthorizedResponse Not Authorized
+	 * @param notFoundResponse Not Found
 	 * @returns User refreshed tokens
 	 */
 	@Post('/{userId}/refresh')
@@ -235,9 +249,9 @@ export class UserController extends Controller {
 	 * @param userBody.username the user new username
 	 * @param userBody.password the user new plain password
 	 * @param req the express request
-	 * @param notAuthenticatedResponse Not authenticated
-	 * @param notAuthorizedResponse Not authorized
-	 * @param notFoundResponse Content not found
+	 * @param notAuthenticatedResponse Not Authenticated
+	 * @param notAuthorizedResponse Not Authorized
+	 * @param notFoundResponse Not Found
 	 * @returns No content
 	 */
 	@Put('/{userId}')
@@ -273,9 +287,9 @@ export class UserController extends Controller {
 	 *
 	 * @param userId the user id
 	 * @param req the express request
-	 * @param notAuthenticatedResponse Not authenticated
-	 * @param notAuthorizedResponse Not authorized
-	 * @param notFoundResponse Content not found
+	 * @param notAuthenticatedResponse Not Authenticated
+	 * @param notAuthorizedResponse Not Authorized
+	 * @param notFoundResponse Not Found
 	 * @returns No content
 	 */
 	@Delete('/{userId}')

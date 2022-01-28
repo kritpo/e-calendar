@@ -60,6 +60,29 @@ export class UserService {
 	}
 
 	/**
+	 * retrieve a specific user by its username
+	 *
+	 * @param username the username of the user to retrieve
+	 * @returns the found user
+	 */
+	public async getByUsername(username: string): Promise<IPublicUser | null> {
+		const userData = { username };
+
+		const users = await User.find(userData).exec();
+		const user = users[0];
+
+		if (user !== undefined) {
+			LOGGER.info(`${user.username} is retrieved`);
+
+			return { id: getDocumentId(user).toString(), username };
+		}
+
+		LOGGER.info(`${username} does not exist and its not retrieved`);
+
+		return null;
+	}
+
+	/**
 	 * retrieve a specific user by its username and password
 	 *
 	 * @param username the username of the user to retrieve
