@@ -35,7 +35,6 @@ interface ITokenBody {
  */
 @injectable()
 @Response<IErrorResponse>(400, 'Bad Request')
-@Response<IErrorResponse>(404, 'Not Found')
 @Response<IErrorResponse>(500, 'Server Internal Error')
 @Security('token')
 @Route('/users')
@@ -108,12 +107,12 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * register the user
+	 * register an user
 	 *
 	 * @param userBody the user data
 	 * @param userBody.username the user username
 	 * @param userBody.password the user plain password
-	 * @returns Created user data
+	 * @returns Created user
 	 */
 	@Post('/register')
 	public async register(@Body() userBody: IUser): Promise<PublicUserType> {
@@ -126,9 +125,9 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * login the user
+	 * login an user
 	 *
-	 * @param userBody the user data
+	 * @param userBody the user credentials
 	 * @param userBody.username the user username
 	 * @param userBody.password the user plain password
 	 * @param notAuthenticatedResponse Not authenticated
@@ -156,16 +155,16 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * refresh the user access
+	 * refresh the user tokens
 	 *
 	 * @param userId the user id
-	 * @param tokenBody the token data
+	 * @param tokenBody the refresh token
 	 * @param tokenBody.refreshToken the refresh token
 	 * @param req the express request
 	 * @param notAuthenticatedResponse Not authenticated
 	 * @param notAuthorizedResponse Not authorized
 	 * @param notFoundResponse Content not found
-	 * @returns Refreshed user new tokens
+	 * @returns User refreshed tokens
 	 */
 	@Post('/{userId}/refresh')
 	public async refresh(
@@ -204,11 +203,11 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * retrieve a single user
+	 * retrieve the user
 	 *
 	 * @param userId the user id
 	 * @param notFoundResponse Content not found
-	 * @returns Retrieved user data
+	 * @returns Retrieved user
 	 */
 	@Get('/{userId}')
 	public async getUser(
@@ -229,12 +228,12 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * update a single user
+	 * update the user
 	 *
 	 * @param userId the user id
-	 * @param userBody the new user data
-	 * @param userBody.username the new user username
-	 * @param userBody.password the new user plain password
+	 * @param userBody the new user data (all properties are optional)
+	 * @param userBody.username the user new username
+	 * @param userBody.password the user new plain password
 	 * @param req the express request
 	 * @param notAuthenticatedResponse Not authenticated
 	 * @param notAuthorizedResponse Not authorized
@@ -270,7 +269,7 @@ export class UserController extends Controller {
 	}
 
 	/**
-	 * delete a single user
+	 * delete the user
 	 *
 	 * @param userId the user id
 	 * @param req the express request
