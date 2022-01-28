@@ -5,7 +5,10 @@ import express, { NextFunction, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { ValidateError } from 'tsoa';
 
-import { registerRequestLogger } from './utils/logging/registerRequestLogger';
+import {
+	registerRequestLogger,
+	registerRequestParamsLogger
+} from './utils/logging/registerRequestLogger';
 import { RegisterRoutes } from './utils/tsoa/routes';
 
 /**
@@ -13,10 +16,12 @@ import { RegisterRoutes } from './utils/tsoa/routes';
  */
 export const app = express();
 
+registerRequestLogger(app);
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-registerRequestLogger(app);
+registerRequestParamsLogger(app);
 
 app.use((_, response, next) => {
 	response.removeHeader('X-Powered-By');
@@ -37,6 +42,8 @@ app.use(
 		}
 	)
 );
+
+RegisterRoutes(app);
 
 app.use((_, res) => {
 	res.status(404).send({
@@ -63,5 +70,3 @@ app.use((err: unknown, _: unknown, res: Response, next: NextFunction) => {
 
 	next();
 });
-
-RegisterRoutes(app);

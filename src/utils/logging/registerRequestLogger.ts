@@ -40,7 +40,7 @@ const stream = {
  */
 export const registerRequestLogger = (app: Express): void => {
 	app.use(
-		morgan('## START ## [:remote-addr] :method :url\n:parameters', {
+		morgan('## START ## [:remote-addr] :method :url', {
 			immediate: true,
 			skip: skipTests,
 			stream
@@ -54,5 +54,20 @@ export const registerRequestLogger = (app: Express): void => {
 				stream
 			}
 		)
+	);
+};
+
+/**
+ * register the params logger
+ *
+ * @param app express application
+ */
+export const registerRequestParamsLogger = (app: Express): void => {
+	app.use(
+		morgan('## PARAMS ##\n:parameters', {
+			immediate: true,
+			skip: skipTests,
+			stream
+		})
 	);
 };
