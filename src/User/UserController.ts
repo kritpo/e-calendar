@@ -12,6 +12,7 @@ import {
 	Response,
 	Route,
 	Security,
+	SuccessResponse,
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
@@ -66,8 +67,7 @@ export class UserController extends Controller {
 		if (
 			params.notFoundResponse !== undefined &&
 			params.notFoundResponse !== null &&
-			params.user === undefined &&
-			params.user === null
+			(params.user === undefined || params.user === null)
 		) {
 			return generateErrorResponse<404, T>(
 				params.notFoundResponse,
@@ -77,8 +77,7 @@ export class UserController extends Controller {
 		} else if (
 			params.notAuthenticatedResponse !== undefined &&
 			params.notAuthenticatedResponse !== null &&
-			params.reqUser === undefined &&
-			params.reqUser === null
+			(params.reqUser === undefined || params.reqUser === null)
 		) {
 			return generateErrorResponse<401, T>(
 				params.notAuthenticatedResponse,
@@ -141,6 +140,7 @@ export class UserController extends Controller {
 	 * @param conflictResponse Conflict
 	 * @returns Created user
 	 */
+	@SuccessResponse('201', 'Created user')
 	@Post('/register')
 	public async register(
 		@Body() userBody: IUser,
