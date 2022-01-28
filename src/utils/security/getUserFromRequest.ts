@@ -10,6 +10,6 @@ import { IPublicUser } from '../../User/User';
  */
 export const getUserFromRequest = (
 	req: express.Request
-): IPublicUser | undefined => {
-	return (req as { user?: IPublicUser }).user;
+): IPublicUser | null => {
+	return (req as { user?: IPublicUser }).user ?? null;
 };

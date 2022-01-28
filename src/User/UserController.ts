@@ -26,6 +26,14 @@ import {
 import { IPublicUser, IUser } from './User';
 import { UserService } from './UserService';
 
+interface IGenerateResponseParams {
+	notAuthenticatedResponse?: TsoaResponse<401, IErrorResponse> | null;
+	notAuthorizedResponse?: TsoaResponse<403, IErrorResponse> | null;
+	notFoundResponse?: TsoaResponse<404, IErrorResponse> | null;
+	user?: IPublicUser | null;
+	reqUser?: IPublicUser | null;
+}
+
 interface ITokenBody {
 	refreshToken: string;
 }
@@ -43,36 +51,54 @@ export class UserController extends Controller {
 	 * generate response
 	 *
 	 * @param cb the main response function
-	 * @param notAuthenticatedResponse Not Authenticated
-	 * @param notAuthorizedResponse Not Authorized
-	 * @param notFoundResponse Content not found
-	 * @param user the user to access
-	 * @param reqUser the user who access to ressource
+	 * @param params the generator params
+	 * @param params.notAuthenticatedResponse Not Authenticated
+	 * @param params.notAuthorizedResponse Not Authorized
+	 * @param params.notFoundResponse Content not found
+	 * @param params.user the user to access
+	 * @param params.reqUser the user who access to ressource
 	 * @returns the generated response or null if no error response is generated
 	 */
 	private async _generateResponse<T>(
 		cb: () => T | Promise<T>,
-		notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
-		notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
-		notFoundResponse: TsoaResponse<404, IErrorResponse>,
-		user: IPublicUser | null,
-		reqUser?: IPublicUser
+		params: IGenerateResponseParams
 	): Promise<T> {
-		if (user === null) {
+		if (
+			params.notFoundResponse !== undefined &&
+			params.notFoundResponse !== null &&
+			params.user === undefined &&
+			params.user === null
+		) {
 			return generateErrorResponse<404, T>(
-				notFoundResponse,
+				params.notFoundResponse,
 				404,
 				'Not Found'
 			);
-		} else if (reqUser === undefined) {
+		} else if (
+			params.notAuthenticatedResponse !== undefined &&
+			params.notAuthenticatedResponse !== null &&
+			params.reqUser === undefined &&
+			params.reqUser === null
+		) {
 			return generateErrorResponse<401, T>(
-				notAuthenticatedResponse,
+				params.notAuthenticatedResponse,
 				401,
 				'Not Authenticated'
 			);
-		} else if (!this._authorizationService.isUserSelf(reqUser, user)) {
+		} else if (
+			params.notAuthorizedResponse !== undefined &&
+			params.notAuthorizedResponse !== null &&
+			(params.reqUser === undefined ||
+				params.reqUser === null ||
+				params.user === undefined ||
+				params.user === null ||
+				!this._authorizationService.isUserSelf(
+					params.reqUser,
+					params.user
+				))
+		) {
 			return generateErrorResponse<403, T>(
-				notAuthorizedResponse,
+				params.notAuthorizedResponse,
 				403,
 				'Not Authorized'
 			);
@@ -152,20 +178,24 @@ export class UserController extends Controller {
 		@Body() userBody: IUser,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
 	): Promise<ISecurityTokens> {
-		const user = await this._userService.getByUsernameAndPassword(
+		const reqUser = await this._userService.getByUsernameAndPassword(
 			userBody.username,
 			userBody.password
 		);
 
-		if (user === null) {
-			return generateErrorResponse<401, ISecurityTokens>(
-				notAuthenticatedResponse,
-				401,
-				'Not Authenticated'
-			);
-		}
+		return this._generateResponse(
+			() => {
+				if (reqUser === null) {
+					throw new Error('Should not happen');
+				}
 
-		return this._securityService.createToken(user.id);
+				return this._securityService.createToken(reqUser.id);
+			},
+			{
+				notAuthenticatedResponse,
+				reqUser
+			}
+		);
 	}
 
 	/**
@@ -174,8 +204,6 @@ export class UserController extends Controller {
 	 * @param userId the user id
 	 * @param tokenBody the refresh token
 	 * @param tokenBody.refreshToken the refresh token
-	 * @param req the express request
-	 * @param notAuthenticatedResponse Not Authenticated
 	 * @param notAuthorizedResponse Not Authorized
 	 * @param notFoundResponse Not Found
 	 * @returns User refreshed tokens
@@ -184,12 +212,9 @@ export class UserController extends Controller {
 	public async refresh(
 		@Path() userId: string,
 		@Body() tokenBody: ITokenBody,
-		@Request() req: express.Request,
-		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<ISecurityTokens> {
-		const reqUser = getUserFromRequest(req);
 		const user = await this._userService.getById(userId);
 
 		return this._generateResponse(
@@ -214,11 +239,11 @@ export class UserController extends Controller {
 
 				throw new Error('Should not happen');
 			},
-			notAuthenticatedResponse,
-			notAuthorizedResponse,
-			notFoundResponse,
-			user,
-			reqUser
+			{
+				notAuthorizedResponse,
+				notFoundResponse,
+				user
+			}
 		);
 	}
 
@@ -236,15 +261,19 @@ export class UserController extends Controller {
 	): Promise<IPublicUser> {
 		const user = await this._userService.getById(userId);
 
-		if (user === null) {
-			return generateErrorResponse<404, IPublicUser>(
-				notFoundResponse,
-				404,
-				'Not Found'
-			);
-		}
+		return this._generateResponse(
+			() => {
+				if (user === null) {
+					throw new Error('Should not happen');
+				}
 
-		return user;
+				return user;
+			},
+			{
+				notFoundResponse,
+				user
+			}
+		);
 	}
 
 	/**
@@ -280,11 +309,13 @@ export class UserController extends Controller {
 					userBody.password
 				);
 			},
-			notAuthenticatedResponse,
-			notAuthorizedResponse,
-			notFoundResponse,
-			user,
-			reqUser
+			{
+				notAuthenticatedResponse,
+				notAuthorizedResponse,
+				notFoundResponse,
+				user,
+				reqUser
+			}
 		);
 	}
 
@@ -313,11 +344,13 @@ export class UserController extends Controller {
 			async () => {
 				await this._userService.deleteById(userId);
 			},
-			notAuthenticatedResponse,
-			notAuthorizedResponse,
-			notFoundResponse,
-			user,
-			reqUser
+			{
+				notAuthenticatedResponse,
+				notAuthorizedResponse,
+				notFoundResponse,
+				user,
+				reqUser
+			}
 		);
 	}
 }

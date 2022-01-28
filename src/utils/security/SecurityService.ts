@@ -115,7 +115,7 @@ export class SecurityService {
 		userId: string,
 		refreshToken: string
 	): ISecurityTokens | null {
-		const token = this._securityStore[userId].refreshToken;
+		const token = this._securityStore[userId]?.refreshToken;
 
 		if (
 			token === undefined ||

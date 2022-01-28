@@ -8,10 +8,10 @@ import { SecurityService } from '../security/SecurityService';
 
 const LOGGER = getLogger('expressAuthentication');
 
-const catchUnauthenticated = (): undefined => {
+const catchUnauthenticated = (): null => {
 	LOGGER.info('No authentication');
 
-	return undefined;
+	return null;
 };
 
 /**
@@ -25,7 +25,7 @@ export const expressAuthentication: (
 	request: express.Request,
 	securityName: string,
 	_: unknown
-) => Promise<IPublicUser | undefined> = async (request, securityName) => {
+) => Promise<IPublicUser | null> = async (request, securityName) => {
 	if (securityName === 'token') {
 		const authorization = request.headers.authorization?.split(' ');
 
