@@ -64,6 +64,16 @@ app.use((err: unknown, _: unknown, res: Response, next: NextFunction) => {
 		return;
 	}
 
+	if (err instanceof SyntaxError) {
+		res.status(400).json({
+			message: 'Bad Request'
+		});
+
+		LOGGER.warn('Error 400: Bad Request - Malformed JSON');
+
+		return;
+	}
+
 	if (err instanceof Error) {
 		res.status(500).json({
 			message: 'Internal Server Error'
