@@ -204,6 +204,12 @@ export class UserController extends Controller {
 					if (response !== null) {
 						return response;
 					}
+
+					return generateErrorResponse<403, ISecurityTokens>(
+						notAuthorizedResponse,
+						403,
+						'Not Authorized'
+					);
 				}
 
 				throw new Error('Should not happen');
