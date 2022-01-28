@@ -33,6 +33,7 @@ interface ITokenBody {
  * users controller
  */
 @injectable()
+@Security('token')
 @Route('/users')
 export class UserController extends Controller {
 	/**
@@ -66,7 +67,7 @@ export class UserController extends Controller {
 				401,
 				'Not authenticated'
 			);
-		} else if (this._authorizationService.isUserSelf(reqUser, user)) {
+		} else if (!this._authorizationService.isUserSelf(reqUser, user)) {
 			return generateErrorResponse<403, T>(
 				notAuthorizedResponse,
 				403,
@@ -97,7 +98,6 @@ export class UserController extends Controller {
 	 *
 	 * @returns List of users
 	 */
-	@Security('jwt')
 	@Get('/')
 	public async getAll(): Promise<PublicUserType[]> {
 		return this._userService.getAll();
@@ -111,7 +111,6 @@ export class UserController extends Controller {
 	 * @param userBody.password the user plain password
 	 * @returns Created user data
 	 */
-	@Security('jwt')
 	@Post('/register')
 	public async register(@Body() userBody: IUser): Promise<PublicUserType> {
 		this.setStatus(201);
@@ -128,20 +127,25 @@ export class UserController extends Controller {
 	 * @param userBody the user data
 	 * @param userBody.username the user username
 	 * @param userBody.password the user plain password
-	 * @returns Logged user tokens or null if the action failed
+	 * @param notAuthenticatedResponse Not authenticated
+	 * @returns Logged user tokens
 	 */
-	@Security('jwt')
 	@Post('/login')
 	public async login(
-		@Body() userBody: IUser
-	): Promise<ISecurityTokens | null> {
+		@Body() userBody: IUser,
+		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
+	): Promise<ISecurityTokens> {
 		const user = await this._userService.getByUsernameAndPassword(
 			userBody.username,
 			userBody.password
 		);
 
 		if (user === null) {
-			return null;
+			return generateErrorResponse<401, ISecurityTokens>(
+				notAuthenticatedResponse,
+				401,
+				'Not authenticated'
+			);
 		}
 
 		return this._securityService.createToken(user.id);
@@ -159,7 +163,6 @@ export class UserController extends Controller {
 	 * @param notFoundResponse Content not found
 	 * @returns Refreshed user new tokens
 	 */
-	@Security('jwt')
 	@Post('/{userId}/refresh')
 	public async refresh(
 		@Path() userId: string,

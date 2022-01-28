@@ -5,10 +5,10 @@
 		"specVersion": 3,
 		"name": "E-Calendar",
 		"securityDefinitions": {
-			"jwt": {
+			"token": {
 				"type": "http",
 				"scheme": "bearer",
-				"bearerFormat": "JWT",
+				"bearerFormat": "Token",
 				"description": "Access token retrieved on authentication endpoint."
 			}
 		},

@@ -1,10 +1,8 @@
 import * as express from 'express';
-import * as jwt from 'jsonwebtoken';
 import { container } from 'tsyringe';
 
 import { PublicUserType } from '../../User/User';
 import { UserService } from '../../User/UserService';
-import { getEnv } from '../getEnv';
 import { getLogger } from '../logging/getLogger';
 import { SecurityService } from '../security/SecurityService';
 
@@ -30,7 +28,7 @@ export const expressAuthentication = (
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_: unknown
 ): Promise<PublicUserType | undefined> => {
-	if (securityName === 'jwt') {
+	if (securityName === 'token') {
 		const authorization = request.headers.authorization?.split(' ');
 
 		if (
@@ -40,43 +38,27 @@ export const expressAuthentication = (
 		) {
 			const token = authorization[1];
 
-			return new Promise((resolve) => {
-				const secret = getEnv('JWT_SECRET');
+			const securityService = container.resolve(SecurityService);
+			const userId = securityService.getUserIDFromAccessToken(token);
 
-				jwt.verify(token, secret, function (err, token) {
-					if (err === null && token !== undefined) {
-						const securityService =
-							container.resolve(SecurityService);
-						const userId = securityService.getUserIDFromAccessToken(
-							token.accessToken as string
-						);
+			if (userId !== null) {
+				const userService = container.resolve(UserService);
 
-						if (userId !== null) {
-							const userService = container.resolve(UserService);
-							userService
-								.getById(userId)
-								.then((user) => {
-									if (user !== null) {
-										LOGGER.info(
-											`${userId} is authenticated`
-										);
+				return userService
+					.getById(userId)
+					.then((user) => {
+						if (user !== null) {
+							LOGGER.info(`${userId} is authenticated`);
 
-										resolve(user);
-									} else {
-										throw new Error(
-											'The user does not exist'
-										);
-									}
-								})
-								.catch(() => {
-									resolve(catchUnauthenticated());
-								});
+							return user;
 						}
-					}
 
-					resolve(catchUnauthenticated());
-				});
-			});
+						throw new Error('The user does not exist');
+					})
+					.catch(() => {
+						return catchUnauthenticated();
+					});
+			}
 		}
 	}
 
