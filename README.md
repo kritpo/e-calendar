@@ -41,7 +41,7 @@ Create for `development` in `.env`:
 MONGODB_USERNAME=root
 MONGODB_PASSWORD=p455w0rd
 MONGODB_HOST=localhost
-MONGODB_PORT=27020
+MONGODB_PORT=27017
 MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
@@ -59,7 +59,7 @@ Create for `test` in `.env.test`:
 MONGODB_USERNAME=root
 MONGODB_PASSWORD=p455w0rd
 MONGODB_HOST=localhost
-MONGODB_PORT=27020
+MONGODB_PORT=27017
 MONGODB_DATABASE=e_calendar_test
 
 ### E-Calendar ###

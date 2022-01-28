@@ -21,11 +21,14 @@ const catchUnauthenticated = (): undefined => {
  *
  * @param request request object
  * @param securityName name of the security definition
+ * @param _ _
  * @returns authenticated user data
  */
 export const expressAuthentication = (
 	request: express.Request,
-	securityName: string
+	securityName: string,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	_: unknown
 ): Promise<PublicUserType | undefined> => {
 	if (securityName === 'jwt') {
 		const authorization = request.headers.authorization?.split(' ');

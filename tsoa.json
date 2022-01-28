@@ -19,7 +19,7 @@
 		"middleware": "express",
 		"noWriteIfUnchanged": true,
 		"iocModule": "./src/utils/tsoa/ioc.ts",
-		"authentificationModule": "./src/utils/tsoa/authentification.ts",
+		"authenticationModule": "./src/utils/tsoa/authentification.ts",
 		"useSuccessResponseCode": true
 	},
 	"entryFile": "./src/index.ts",
