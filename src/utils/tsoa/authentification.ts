@@ -19,15 +19,13 @@ const catchUnauthenticated = (): undefined => {
  *
  * @param request request object
  * @param securityName name of the security definition
- * @param _ _
  * @returns authenticated user data
  */
-export const expressAuthentication = (
+export const expressAuthentication: (
 	request: express.Request,
 	securityName: string,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	_: unknown
-): Promise<PublicUserType | undefined> => {
+) => Promise<PublicUserType | undefined> = async (request, securityName) => {
 	if (securityName === 'token') {
 		const authorization = request.headers.authorization?.split(' ');
 

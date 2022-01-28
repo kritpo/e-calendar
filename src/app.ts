@@ -1,8 +1,9 @@
 import path from 'path';
 
 import bodyParser from 'body-parser';
-import express from 'express';
+import express, { NextFunction, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
+import { ValidateError } from 'tsoa';
 
 import { registerRequestLogger } from './utils/logging/registerRequestLogger';
 import { RegisterRoutes } from './utils/tsoa/routes';
@@ -36,5 +37,31 @@ app.use(
 		}
 	)
 );
+
+app.use((_, res) => {
+	res.status(404).send({
+		message: 'Not Found'
+	});
+});
+
+app.use((err: unknown, _: unknown, res: Response, next: NextFunction) => {
+	if (err instanceof ValidateError) {
+		res.status(400).json({
+			message: 'Bad Request'
+		});
+
+		return;
+	}
+
+	if (err instanceof Error) {
+		res.status(500).json({
+			message: 'Internal Server Error'
+		});
+
+		return;
+	}
+
+	next();
+});
 
 RegisterRoutes(app);

@@ -9,6 +9,7 @@ import {
 	Put,
 	Request,
 	Res,
+	Response,
 	Route,
 	Security,
 	TsoaResponse
@@ -33,6 +34,9 @@ interface ITokenBody {
  * users controller
  */
 @injectable()
+@Response<IErrorResponse>(400, 'Bad Request')
+@Response<IErrorResponse>(404, 'Not Found')
+@Response<IErrorResponse>(500, 'Server Internal Error')
 @Security('token')
 @Route('/users')
 export class UserController extends Controller {
@@ -59,19 +63,19 @@ export class UserController extends Controller {
 			return generateErrorResponse<404, T>(
 				notFoundResponse,
 				404,
-				'Not found'
+				'Not Found'
 			);
 		} else if (reqUser === undefined) {
 			return generateErrorResponse<401, T>(
 				notAuthenticatedResponse,
 				401,
-				'Not authenticated'
+				'Not Authenticated'
 			);
 		} else if (!this._authorizationService.isUserSelf(reqUser, user)) {
 			return generateErrorResponse<403, T>(
 				notAuthorizedResponse,
 				403,
-				'Not authorized'
+				'Not Authorized'
 			);
 		}
 
@@ -144,7 +148,7 @@ export class UserController extends Controller {
 			return generateErrorResponse<401, ISecurityTokens>(
 				notAuthenticatedResponse,
 				401,
-				'Not authenticated'
+				'Not Authenticated'
 			);
 		}
 
@@ -217,7 +221,7 @@ export class UserController extends Controller {
 			return generateErrorResponse<404, PublicUserType>(
 				notFoundResponse,
 				404,
-				'Not found'
+				'Not Found'
 			);
 		}
 
