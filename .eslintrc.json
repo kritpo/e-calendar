@@ -89,7 +89,7 @@
 			{
 				"selector": "variable",
 				"modifiers": ["const"],
-				"format": ["camelCase", "UPPER_CASE"],
+				"format": ["PascalCase", "camelCase", "UPPER_CASE"],
 				"leadingUnderscore": "allow",
 				"trailingUnderscore": "forbid"
 			},

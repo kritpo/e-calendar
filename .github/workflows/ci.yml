@@ -44,4 +44,4 @@ jobs:
 
             - name: stop dependencies containers
               if: always()
-              run: docker-compose -f ./resources/docker-compose.yml down
+              run: docker-compose  -f ./resources/docker-compose.yml --env-file .env down

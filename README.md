@@ -41,11 +41,14 @@ Create for `development` in `.env`:
 MONGODB_USERNAME=root
 MONGODB_PASSWORD=p455w0rd
 MONGODB_HOST=localhost
-MONGODB_PORT=27020
+MONGODB_PORT=27017
 MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
 PORT=8080
+SEED={a random seed}
+ACCESS_TOKEN_EXPIRES_MINUTES=10
+REFRESH_TOKEN_EXPIRES_MINUTES=60
 ```
 
 Create for `test` in `.env.test`:
@@ -55,11 +58,14 @@ Create for `test` in `.env.test`:
 MONGODB_USERNAME=root
 MONGODB_PASSWORD=p455w0rd
 MONGODB_HOST=localhost
-MONGODB_PORT=27020
+MONGODB_PORT=27017
 MONGODB_DATABASE=e_calendar_test
 
 ### E-Calendar ###
 PORT=8081
+SEED={a random seed}
+ACCESS_TOKEN_EXPIRES_MINUTES=10
+REFRESH_TOKEN_EXPIRES_MINUTES=60
 ```
 
 Create for `production` in `.env.production`:
@@ -74,6 +80,9 @@ MONGODB_DATABASE=e_calendar
 
 ### E-Calendar ###
 PORT=8090
+SEED={a random seed}
+ACCESS_TOKEN_EXPIRES_MINUTES=10
+REFRESH_TOKEN_EXPIRES_MINUTES=60
 ```
 
 ### `Install Dependencies`

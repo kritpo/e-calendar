@@ -1,19 +1,20 @@
 import path from 'path';
 
 import bodyParser from 'body-parser';
-import express from 'express';
+import express, { NextFunction, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
+import { ValidateError } from 'tsoa';
 
-import { registerRequestLogger } from './utils/logging/registerRequestLogger';
+import { getLogger } from './utils/logging/getLogger';
+import {
+	registerRequestLogger,
+	registerRequestParamsLogger
+} from './utils/logging/registerRequestLogger';
 import { RegisterRoutes } from './utils/tsoa/routes';
 
-/**
- * main express application
- */
-export const app = express();
+const LOGGER = getLogger('app');
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+export const app = express();
 
 registerRequestLogger(app);
 
@@ -22,6 +23,11 @@ app.use((_, response, next) => {
 
 	next();
 });
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+registerRequestParamsLogger(app);
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(
@@ -38,3 +44,45 @@ app.use(
 );
 
 RegisterRoutes(app);
+
+app.use((_, res) => {
+	res.status(404).send({
+		message: 'Not Found'
+	});
+});
+
+app.use((err: unknown, _: unknown, res: Response, next: NextFunction) => {
+	if (err instanceof ValidateError) {
+		res.status(400).json({
+			message: 'Bad Request'
+		});
+
+		LOGGER.warn(
+			`Error 400: Bad Request:\n${JSON.stringify(err.fields, null, 2)}`
+		);
+
+		return;
+	}
+
+	if (err instanceof SyntaxError) {
+		res.status(400).json({
+			message: 'Bad Request'
+		});
+
+		LOGGER.warn('Error 400: Bad Request - Malformed JSON');
+
+		return;
+	}
+
+	if (err instanceof Error) {
+		res.status(500).json({
+			message: 'Internal Server Error'
+		});
+
+		LOGGER.error('Error 500: Internal Server Error', err);
+
+		return;
+	}
+
+	next();
+});

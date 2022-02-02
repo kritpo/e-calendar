@@ -5,10 +5,10 @@
 		"specVersion": 3,
 		"name": "E-Calendar",
 		"securityDefinitions": {
-			"jwt": {
+			"token": {
 				"type": "http",
 				"scheme": "bearer",
-				"bearerFormat": "JWT",
+				"bearerFormat": "Token",
 				"description": "Access token retrieved on authentication endpoint."
 			}
 		},
@@ -19,7 +19,7 @@
 		"middleware": "express",
 		"noWriteIfUnchanged": true,
 		"iocModule": "./src/utils/tsoa/ioc.ts",
-		"authentificationModule": "./src/utils/tsoa/authentification.ts",
+		"authenticationModule": "./src/utils/tsoa/authentification.ts",
 		"useSuccessResponseCode": true
 	},
 	"entryFile": "./src/index.ts",
