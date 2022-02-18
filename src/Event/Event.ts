@@ -1,11 +1,18 @@
 import { Schema, model } from 'mongoose';
 
-interface IDate {
+import { IUser } from '../User/User';
+
+export interface IDate {
 	day: number;
 	month: number;
 	year: number;
 	hour?: number;
 	minute?: number;
+}
+
+export interface IRecurrence {
+	endPeriod: IDate;
+	periodicity: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
 
 const dateSchema = new Schema<IDate>({
@@ -16,11 +23,6 @@ const dateSchema = new Schema<IDate>({
 	minute: { type: Number, required: false }
 });
 
-interface IRecurrence {
-	endPeriod: IDate;
-	periodicity: 'daily' | 'weekly' | 'monthly' | 'yearly';
-}
-
 const recurrenceSchema = new Schema<IRecurrence>({
 	endPeriod: {
 		type: dateSchema,
@@ -29,14 +31,14 @@ const recurrenceSchema = new Schema<IRecurrence>({
 	periodicity: { type: String, required: true }
 });
 
-interface IEvent {
+export interface IEvent {
 	name: string;
 	startTime: IDate;
 	endTime: IDate;
 	place: string;
-	recurrence?: IRecurrence;
 	description: string;
-	// participant: IUser[];
+	participants: IUser[];
+	recurrence?: IRecurrence;
 }
 
 const eventSchema = new Schema<IEvent>({
@@ -56,4 +58,6 @@ const eventSchema = new Schema<IEvent>({
 
 export const Event = model('Event', eventSchema);
 
-export type PublicEventType = { id: string } & IEvent;
+export interface IPublicEvent extends IEvent {
+	id: string;
+}

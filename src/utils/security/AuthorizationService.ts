@@ -1,5 +1,6 @@
 import { singleton } from 'tsyringe';
 
+import { IPublicEvent } from '../../Event/Event';
 import { IPublicUser } from '../../User/User';
 
 /**
@@ -16,5 +17,16 @@ export class AuthorizationService {
 	 */
 	public isUserSelf(user: IPublicUser, askedUser: IPublicUser): boolean {
 		return user.id === askedUser.id;
+	}
+
+	/**
+	 * check if the event is authorized for the Event service restrictions
+	 *
+	 * @param event the event
+	 * @param askedEvent the event object to verify authorizations
+	 * @returns if the event is authorized to do actions on event
+	 */
+	public isEventSelf(event: IPublicEvent, askedEvent: IPublicEvent): boolean {
+		return event.id === askedEvent.id;
 	}
 }
