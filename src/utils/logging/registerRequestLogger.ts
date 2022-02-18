@@ -7,9 +7,21 @@ import { getLogger } from './getLogger';
 const LOGGER = getLogger('REQUEST');
 
 morgan.token<Request>('parameters', (req) => {
+	let body = req.body as unknown;
+
+	if (body !== null && typeof body === 'object') {
+		let maskedBody = JSON.stringify(body, null, 2);
+		maskedBody = maskedBody.replace(
+			/"password": ".+",?\n/g,
+			'"password": "***"'
+		);
+
+		body = JSON.parse(maskedBody);
+	}
+
 	const parameters = {
 		query: req.query,
-		body: req.body as unknown
+		body
 	};
 
 	return JSON.stringify(parameters, null, 2);
@@ -28,7 +40,7 @@ const stream = {
  */
 export const registerRequestLogger = (app: Express): void => {
 	app.use(
-		morgan('## START ## [:remote-addr] :method :url\n:parameters', {
+		morgan('## START ## [:remote-addr] :method :url', {
 			immediate: true,
 			skip: skipTests,
 			stream
@@ -42,5 +54,20 @@ export const registerRequestLogger = (app: Express): void => {
 				stream
 			}
 		)
+	);
+};
+
+/**
+ * register the params logger
+ *
+ * @param app express application
+ */
+export const registerRequestParamsLogger = (app: Express): void => {
+	app.use(
+		morgan('## PARAMS ##\n:parameters', {
+			immediate: true,
+			skip: skipTests,
+			stream
+		})
 	);
 };

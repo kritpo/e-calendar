@@ -1,8 +1,8 @@
 /* istanbul ignore file */
 import mongoose from 'mongoose';
 
-import { getEnv } from './getEnv';
-import { getLogger } from './logging/getLogger';
+import { getEnv } from '../getEnv';
+import { getLogger } from '../logging/getLogger';
 
 const LOGGER = getLogger('DATABASE');
 

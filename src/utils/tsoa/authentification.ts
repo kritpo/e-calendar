@@ -1,53 +1,64 @@
 import * as express from 'express';
-import * as jwt from 'jsonwebtoken';
+import { container } from 'tsyringe';
 
-// STUB: to replace
+import { IPublicUser } from '../../User/User';
+import { UserService } from '../../User/UserService';
+import { getLogger } from '../logging/getLogger';
+import { SecurityService } from '../security/SecurityService';
+
+const LOGGER = getLogger('expressAuthentication');
+
+const catchUnauthenticated = (): null => {
+	LOGGER.info('No authentication');
+
+	return null;
+};
 
 /**
  * /!\ ONLY FOR TSOA USAGE /!\
  *
- * @param {express.Request} request request object
- * @param {string} securityName name of the security definition
- * @param {string[]} scopes requested scopes
- * @returns {Promise<boolean>} connection status
+ * @param request request object
+ * @param securityName name of the security definition
+ * @returns authenticated user data
  */
-export const expressAuthentication = (
+export const expressAuthentication: (
 	request: express.Request,
 	securityName: string,
-	scopes?: string[]
-): Promise<boolean> => {
-	if (securityName === 'jwt') {
+	_: unknown
+) => Promise<IPublicUser | null> = async (request, securityName) => {
+	if (securityName === 'token') {
 		const authorization = request.headers.authorization?.split(' ');
 
-		if (authorization && authorization[0] === 'Bearer') {
-			return new Promise((resolve, reject) => {
-				const token = authorization[1];
+		if (
+			authorization &&
+			authorization[0] === 'Bearer' &&
+			authorization[1]
+		) {
+			const token = authorization[1];
 
-				if (!token) {
-					reject(new Error('No token provided'));
-				}
+			const securityService = container.resolve(SecurityService);
+			const userId = securityService.getUserIDFromAccessToken(token);
 
-				jwt.verify(token, '[SECRET]', function (err, decoded) {
-					if (err) {
-						reject(err);
-					} else {
-						for (const scope of scopes ?? []) {
-							if (
-								!(decoded?.scopes as string[])?.includes(scope)
-							) {
-								reject(
-									new Error(
-										'JWT does not contain required scope.'
-									)
-								);
-							}
+			if (userId !== null) {
+				const userService = container.resolve(UserService);
+
+				return userService
+					.getById(userId)
+					.then((user) => {
+						if (user !== null) {
+							LOGGER.info(`${userId} is authenticated`);
+
+							return user;
 						}
-						resolve(true);
-					}
-				});
-			});
+
+						throw new Error('The user does not exist');
+					})
+					.catch(() => {
+						return catchUnauthenticated();
+					});
+			}
 		}
 	}
 
-	return Promise.reject(new Error('No authentication credentials'));
+	return Promise.resolve(catchUnauthenticated());
 };
