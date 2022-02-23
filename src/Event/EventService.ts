@@ -6,7 +6,7 @@ import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import { Event, IDate, IEvent, IPublicEvent, IRecurrence } from './Event';
 
-const LOGGER = getLogger('UserService');
+const LOGGER = getLogger('EventService');
 
 /**
  * event management service
@@ -17,7 +17,7 @@ export class EventService {
 	/**
 	 * retrieve all events
 	 *
-	 * @returns all users
+	 * @returns all events
 	 */
 	public async getAllEvents(): Promise<IPublicEvent[]> {
 		const events = await Event.find().exec();
