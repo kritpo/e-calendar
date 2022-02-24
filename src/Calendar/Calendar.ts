@@ -28,4 +28,5 @@ export const Calendar = model('Calendar', calendarSchema);
 
 export interface IPublicCalendar extends ICalendarExtended {
 	id: string;
+	eventsIds: string[];
 }
