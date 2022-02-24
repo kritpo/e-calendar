@@ -218,6 +218,7 @@ export class UserController extends Controller {
 	 * @param notAuthenticatedResponse Not Authenticated
 	 * @param notAuthorizedResponse Not Authorized
 	 * @param notFoundResponse Not Found
+	 * @param conflictResponse Conflict
 	 * @returns No content
 	 */
 	@Put('/{userId}')
@@ -227,8 +228,23 @@ export class UserController extends Controller {
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
-		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
+		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>,
+		@Res() conflictResponse: TsoaResponse<409, IErrorResponse>
 	): Promise<void> {
+		if (newUserBody.username !== undefined) {
+			const tempUser = await this._userService.getByUsername(
+				newUserBody.username
+			);
+
+			if (tempUser !== null) {
+				return generateErrorResponse<409, void>(
+					conflictResponse,
+					409,
+					'Conflict'
+				);
+			}
+		}
+
 		const reqUser = getUserFromRequest(req);
 		const user = await this._userService.getById(userId);
 
