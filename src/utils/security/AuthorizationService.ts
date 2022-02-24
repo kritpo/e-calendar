@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 
-import { IPublicEvent } from '../../Event/Event';
+import { IPublicCalendar } from '../../Calendar/Calendar';
 import { IPublicUser } from '../../User/User';
 
 /**
@@ -20,13 +20,33 @@ export class AuthorizationService {
 	}
 
 	/**
-	 * check if the event is authorized for the Event service restrictions
+	 * check if the user is authorized for the Calendar service restrictions
 	 *
-	 * @param event the event
-	 * @param askedEvent the event object to verify authorizations
-	 * @returns if the event is authorized to do actions on event
+	 * @param user the user
+	 * @param askedCalendar the calendar object to verify authorizations
+	 * @returns if the user is authorized to do actions on calendar
 	 */
-	public isEventSelf(event: IPublicEvent, askedEvent: IPublicEvent): boolean {
-		return event.id === askedEvent.id;
+	public isCalendarOwned(
+		user: IPublicUser,
+		askedCalendar: IPublicCalendar
+	): boolean {
+		return user.id === askedCalendar.ownerId;
+	}
+
+	/**
+	 * check if the user is authorized for the Calendar service restrictions
+	 *
+	 * @param user the user
+	 * @param askedCalendar the calendar object to verify authorizations
+	 * @returns if the user is authorized to do actions on calendar
+	 */
+	public isCalendarAccessible(
+		user: IPublicUser,
+		askedCalendar: IPublicCalendar
+	): boolean {
+		return (
+			this.isCalendarOwned(user, askedCalendar) ||
+			new Set(askedCalendar.collaboratorsIds).has(user.id)
+		);
 	}
 }
