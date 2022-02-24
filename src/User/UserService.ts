@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
 import { getDocumentId } from '../utils/db/getDocumentId';
@@ -22,6 +22,19 @@ export class UserService {
 	constructor(private _securityService: SecurityService) {}
 
 	/**
+	 * retrieve the public user
+	 *
+	 * @param user the user document
+	 * @returns the public user
+	 */
+	private _retrievePublicUser(user: HydratedDocument<IUser>): IPublicUser {
+		return {
+			id: getDocumentId(user).toString(),
+			username: user.username
+		};
+	}
+
+	/**
 	 * create a new account
 	 *
 	 * @param username the account username
@@ -40,7 +53,7 @@ export class UserService {
 
 		LOGGER.info(`${user.username} is created`);
 
-		return { id: getDocumentId(user).toString(), username };
+		return this._retrievePublicUser(user);
 	}
 
 	/**
@@ -53,10 +66,7 @@ export class UserService {
 
 		LOGGER.info(`${users.length} users is retrieved`);
 
-		return users.map((user) => ({
-			id: getDocumentId(user).toString(),
-			username: user.username
-		}));
+		return users.map((user) => this._retrievePublicUser(user));
 	}
 
 	/**
@@ -74,7 +84,7 @@ export class UserService {
 		if (user !== undefined) {
 			LOGGER.info(`${user.username} is retrieved`);
 
-			return { id: getDocumentId(user).toString(), username };
+			return this._retrievePublicUser(user);
 		}
 
 		LOGGER.info(`${username} does not exist and its not retrieved`);
@@ -102,7 +112,7 @@ export class UserService {
 		if (user !== undefined) {
 			LOGGER.info(`${user.username} is retrieved`);
 
-			return { id: getDocumentId(user).toString(), username };
+			return this._retrievePublicUser(user);
 		}
 
 		LOGGER.info(`${username} does not exist and its not retrieved`);
@@ -122,10 +132,7 @@ export class UserService {
 		if (user !== null) {
 			LOGGER.info(`${userId} is retrieved`);
 
-			return {
-				id: getDocumentId(user).toString(),
-				username: user.username
-			};
+			return this._retrievePublicUser(user);
 		}
 
 		LOGGER.info(`${userId} does not exist and its not retrieved`);
