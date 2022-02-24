@@ -6,7 +6,7 @@ checks:
             threshold: 300
     method-lines:
         config:
-            threshold: 50
+            threshold: 60
 
 exclude_patterns:
     - 'config/'
