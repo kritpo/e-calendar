@@ -16,6 +16,10 @@ import {
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
+import {
+	checkExistence,
+	checkExistenceOrShouldNotHappen
+} from '../utils/checkExistance';
 import { generateErrorResponse } from '../utils/response/generateErrorResponse';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
@@ -83,7 +87,7 @@ export class UserController extends Controller {
 	): Promise<IPublicUser> {
 		const user = await this._userService.getByUsername(userBody.username);
 
-		if (user !== null) {
+		if (checkExistence(user)) {
 			return generateErrorResponse<409, IPublicUser>(
 				conflictResponse,
 				409,
@@ -109,7 +113,7 @@ export class UserController extends Controller {
 	public async loginUser(
 		@Body() userBody: IUser,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<ISecurityTokens> {
+	): Promise<ISecurityTokens | undefined> {
 		const reqUser = await this._userService.getByUsernameAndPassword(
 			userBody.username,
 			userBody.password
@@ -117,11 +121,9 @@ export class UserController extends Controller {
 
 		return generateResponse(
 			() => {
-				if (reqUser === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					return this._securityService.createToken(reqUser.id);
 				}
-
-				return this._securityService.createToken(reqUser.id);
 			},
 			{
 				notAuthenticatedResponse,
@@ -151,14 +153,14 @@ export class UserController extends Controller {
 
 		return generateResponse(
 			() => {
-				if (user !== null) {
+				if (checkExistence(user)) {
 					const response =
 						this._securityService.updateAccessTokenToken(
 							user.id,
 							tokenBody.refreshToken
 						);
 
-					if (response !== null) {
+					if (checkExistence(response)) {
 						return response;
 					}
 
@@ -189,16 +191,14 @@ export class UserController extends Controller {
 	public async getUser(
 		@Path() userId: string,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicUser> {
+	): Promise<IPublicUser | undefined> {
 		const user = await this._userService.getById(userId);
 
 		return generateResponse(
 			() => {
-				if (user === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(user)) {
+					return user;
 				}
-
-				return user;
 			},
 			{
 				notFoundResponse,
@@ -231,12 +231,12 @@ export class UserController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>,
 		@Res() conflictResponse: TsoaResponse<409, IErrorResponse>
 	): Promise<void> {
-		if (newUserBody.username !== undefined) {
+		if (checkExistence(newUserBody.username)) {
 			const tempUser = await this._userService.getByUsername(
 				newUserBody.username
 			);
 
-			if (tempUser !== null) {
+			if (checkExistence(tempUser)) {
 				return generateErrorResponse<409, void>(
 					conflictResponse,
 					409,
@@ -264,11 +264,10 @@ export class UserController extends Controller {
 				data: user
 			},
 			() => {
-				if (reqUser === null || user === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isUserSelf(reqUser, user);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(user)
+					? this._authorizationService.isUserSelf(reqUser, user)
+					: false;
 			}
 		);
 	}
@@ -306,11 +305,10 @@ export class UserController extends Controller {
 				data: user
 			},
 			() => {
-				if (reqUser === null || user === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isUserSelf(reqUser, user);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(user)
+					? this._authorizationService.isUserSelf(reqUser, user)
+					: false;
 			}
 		);
 	}

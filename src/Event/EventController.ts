@@ -17,6 +17,7 @@ import {
 } from 'tsoa';
 import { injectable } from 'tsyringe';
 import { CalendarService } from '../Calendar/CalendarService';
+import { checkExistenceOrShouldNotHappen } from '../utils/checkExistance';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
@@ -154,28 +155,26 @@ export class EventController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicEvent> {
+	): Promise<IPublicEvent | undefined> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 
 		return generateResponse(
 			() => {
-				if (reqUser === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					return this._eventService.insert(
+						reqUser.id,
+						calendarId,
+						eventBody.name,
+						this._isolateDate(eventBody.startTime),
+						this._isolateDate(eventBody.endTime),
+						eventBody.place,
+						eventBody.description,
+						eventBody.participantsIds,
+						eventBody.recurrence &&
+							this._isolateRecurrence(eventBody.recurrence)
+					);
 				}
-
-				return this._eventService.insert(
-					reqUser.id,
-					calendarId,
-					eventBody.name,
-					this._isolateDate(eventBody.startTime),
-					this._isolateDate(eventBody.endTime),
-					eventBody.place,
-					eventBody.description,
-					eventBody.participantsIds,
-					eventBody.recurrence &&
-						this._isolateRecurrence(eventBody.recurrence)
-				);
 			},
 			{
 				notAuthenticatedResponse,
@@ -185,14 +184,13 @@ export class EventController extends Controller {
 				data: calendar
 			},
 			() => {
-				if (reqUser === null || calendar === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isCalendarAccessible(
-					reqUser,
-					calendar
-				);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(calendar)
+					? this._authorizationService.isCalendarAccessible(
+							reqUser,
+							calendar
+					  )
+					: false;
 			}
 		);
 	}
@@ -217,18 +215,16 @@ export class EventController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicEvent> {
+	): Promise<IPublicEvent | undefined> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 		const event = await this._eventService.getById(calendarId, eventId);
 
 		return generateResponse(
 			() => {
-				if (event === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(event)) {
+					return event;
 				}
-
-				return event;
 			},
 			{
 				notAuthenticatedResponse,
@@ -238,15 +234,15 @@ export class EventController extends Controller {
 				data: calendar && event
 			},
 			() => {
-				if (reqUser === null || calendar === null || event === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isEventAccessible(
-					reqUser,
-					calendar,
-					event
-				);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(calendar) &&
+					checkExistenceOrShouldNotHappen(event)
+					? this._authorizationService.isEventAccessible(
+							reqUser,
+							calendar,
+							event
+					  )
+					: false;
 			}
 		);
 	}
@@ -304,25 +300,23 @@ export class EventController extends Controller {
 
 		return generateResponse(
 			async () => {
-				if (reqUser === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					await this._eventService.updateById(
+						reqUser.id,
+						calendarId,
+						eventId,
+						newEventBody.name,
+						newEventBody.startTime &&
+							this._isolateDate(newEventBody.startTime),
+						newEventBody.endTime &&
+							this._isolateDate(newEventBody.endTime),
+						newEventBody.place,
+						newEventBody.description,
+						newEventBody.participantsIds,
+						newEventBody.recurrence &&
+							this._isolateRecurrence(newEventBody.recurrence)
+					);
 				}
-
-				await this._eventService.updateById(
-					reqUser.id,
-					calendarId,
-					eventId,
-					newEventBody.name,
-					newEventBody.startTime &&
-						this._isolateDate(newEventBody.startTime),
-					newEventBody.endTime &&
-						this._isolateDate(newEventBody.endTime),
-					newEventBody.place,
-					newEventBody.description,
-					newEventBody.participantsIds,
-					newEventBody.recurrence &&
-						this._isolateRecurrence(newEventBody.recurrence)
-				);
 			},
 			{
 				notAuthenticatedResponse,
@@ -332,14 +326,13 @@ export class EventController extends Controller {
 				data: calendar && event
 			},
 			() => {
-				if (reqUser === null || calendar === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isCalendarAccessible(
-					reqUser,
-					calendar
-				);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(calendar)
+					? this._authorizationService.isCalendarAccessible(
+							reqUser,
+							calendar
+					  )
+					: false;
 			}
 		);
 	}
@@ -381,14 +374,13 @@ export class EventController extends Controller {
 				data: calendar && event
 			},
 			() => {
-				if (reqUser === null || calendar === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isCalendarAccessible(
-					reqUser,
-					calendar
-				);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(calendar)
+					? this._authorizationService.isCalendarAccessible(
+							reqUser,
+							calendar
+					  )
+					: false;
 			}
 		);
 	}

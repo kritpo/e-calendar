@@ -4,6 +4,7 @@ import sha1 from 'crypto-js/sha1';
 import { addMinutes, isAfter, isBefore } from 'date-fns';
 import { singleton } from 'tsyringe';
 
+import { checkExistence } from '../checkExistance';
 import { getEnv } from '../getEnv';
 import { getLogger } from '../logging/getLogger';
 
@@ -118,7 +119,7 @@ export class SecurityService {
 		const token = this._securityStore[userId]?.refreshToken;
 
 		if (
-			token === undefined ||
+			!checkExistence(token) ||
 			token.token !== refreshToken ||
 			isAfter(new Date(), token.expires)
 		) {

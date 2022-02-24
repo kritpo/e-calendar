@@ -1,3 +1,4 @@
+import { checkExistence } from '../../checkExistance';
 import { LoggingLevelEnum } from '../types';
 import { formatLog } from '../utils/formatLog';
 import { AbstractLogger } from './AbstractLogger';
@@ -19,10 +20,11 @@ export class DevLogger extends AbstractLogger {
 
 		let log = formatLog(level, formattedLog);
 
-		if (level !== LoggingLevelEnum.INFO && err !== undefined) {
+		if (level !== LoggingLevelEnum.INFO && checkExistence(err)) {
 			let formattedError = `[${date}] ${this._origin}/TRACE: ${err.name}`;
-			formattedError +=
-				err.stack !== undefined ? `\n${err.stack}` : `[${err.message}]`;
+			formattedError += checkExistence(err.stack)
+				? `\n${err.stack}`
+				: `[${err.message}]`;
 
 			log += '\n' + formatLog(LoggingLevelEnum.ERROR, formattedError);
 		}
