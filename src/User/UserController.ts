@@ -63,7 +63,7 @@ export class UserController extends Controller {
 	 */
 	@Get('/')
 	public async getAll(): Promise<IPublicUser[]> {
-		return this._userService.getAll();
+		return this._userService.getAllUsers();
 	}
 
 	/**
@@ -81,7 +81,9 @@ export class UserController extends Controller {
 		@Body() userBody: IUser,
 		@Res() conflictResponse: TsoaResponse<409, IErrorResponse>
 	): Promise<IPublicUser> {
-		const user = await this._userService.getByUsername(userBody.username);
+		const user = await this._userService.getUserByUsername(
+			userBody.username
+		);
 
 		if (user !== null) {
 			return generateErrorResponse<409, IPublicUser>(
@@ -113,7 +115,7 @@ export class UserController extends Controller {
 		@Body() userBody: IUser,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
 	): Promise<ISecurityTokens> {
-		const reqUser = await this._userService.getByUsernameAndPassword(
+		const reqUser = await this._userService.getUserByUsernameAndPassword(
 			userBody.username,
 			userBody.password
 		);
@@ -150,7 +152,7 @@ export class UserController extends Controller {
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<ISecurityTokens> {
-		const user = await this._userService.getById(userId);
+		const user = await this._userService.getUserById(userId);
 
 		return generateResponse(
 			() => {
@@ -193,7 +195,7 @@ export class UserController extends Controller {
 		@Path() userId: string,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<IPublicUser> {
-		const user = await this._userService.getById(userId);
+		const user = await this._userService.getUserById(userId);
 
 		return generateResponse(
 			() => {
@@ -233,11 +235,11 @@ export class UserController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<void> {
 		const reqUser = getUserFromRequest(req);
-		const user = await this._userService.getById(userId);
+		const user = await this._userService.getUserById(userId);
 
 		return generateResponse(
 			async () => {
-				await this._userService.updateById(
+				await this._userService.updateUserById(
 					userId,
 					userBody.username,
 					userBody.password
@@ -275,11 +277,11 @@ export class UserController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<void> {
 		const reqUser = getUserFromRequest(req);
-		const user = await this._userService.getById(userId);
+		const user = await this._userService.getUserById(userId);
 
 		return generateResponse(
 			async () => {
-				await this._userService.deleteById(userId);
+				await this._userService.deleteUserById(userId);
 			},
 			{
 				notAuthenticatedResponse,

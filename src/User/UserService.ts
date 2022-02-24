@@ -61,7 +61,7 @@ export class UserService {
 	 *
 	 * @returns all users
 	 */
-	public async getAll(): Promise<IPublicUser[]> {
+	public async getAllUsers(): Promise<IPublicUser[]> {
 		const users = await User.find().exec();
 
 		LOGGER.info(`${users.length} users is retrieved`);
@@ -75,7 +75,9 @@ export class UserService {
 	 * @param username the username of the user to retrieve
 	 * @returns the found user
 	 */
-	public async getByUsername(username: string): Promise<IPublicUser | null> {
+	public async getUserByUsername(
+		username: string
+	): Promise<IPublicUser | null> {
 		const userData = { username };
 
 		const users = await User.find(userData).exec();
@@ -99,7 +101,7 @@ export class UserService {
 	 * @param plainPassword the plain password of the user to retrieve
 	 * @returns the found user
 	 */
-	public async getByUsernameAndPassword(
+	public async getUserByUsernameAndPassword(
 		username: string,
 		plainPassword: string
 	): Promise<IPublicUser | null> {
@@ -126,7 +128,7 @@ export class UserService {
 	 * @param userId the id of the user
 	 * @returns the found user
 	 */
-	public async getById(userId: string): Promise<IPublicUser | null> {
+	public async getUserById(userId: string): Promise<IPublicUser | null> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
 		if (user !== null) {
@@ -148,7 +150,7 @@ export class UserService {
 	 * @param plainNewPassword the new password
 	 * @returns if the update succeed
 	 */
-	public async updateById(
+	public async updateUserById(
 		userId: string,
 		newUsername?: string,
 		plainNewPassword?: string
@@ -184,7 +186,7 @@ export class UserService {
 	 * @param userId the id of the user
 	 * @returns if the deletion succeed
 	 */
-	public async deleteById(userId: string): Promise<boolean> {
+	public async deleteUserById(userId: string): Promise<boolean> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
 		if (user === null) {
