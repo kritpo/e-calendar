@@ -60,7 +60,9 @@ export class CalendarService {
 			type,
 			description,
 			collaboratorsIds:
-				type === CalendarTypeEnum.PRIVATE ? [] : collaboratorsIds
+				type === CalendarTypeEnum.PRIVATE
+					? []
+					: [...new Set(collaboratorsIds)]
 		};
 
 		const calendar = new Calendar(calendarData);
@@ -158,7 +160,7 @@ export class CalendarService {
 			calendar.type === CalendarTypeEnum.PRIVATE
 				? []
 				: newCollaboratorsIds !== undefined
-				? newCollaboratorsIds
+				? [...new Set(newCollaboratorsIds)]
 				: calendar.collaboratorsIds;
 
 		await calendar.save();

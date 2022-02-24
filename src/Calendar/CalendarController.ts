@@ -12,10 +12,10 @@ import {
 	Response,
 	Route,
 	Security,
+	SuccessResponse,
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
-import { IPublicUser } from '../User/User';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
@@ -86,6 +86,7 @@ export class CalendarController extends Controller {
 	 * @param notAuthenticatedResponse Not Authenticated
 	 * @returns Created calendar
 	 */
+	@SuccessResponse('201', 'Created calendar')
 	@Post('/')
 	public async insertCalendar(
 		@Body() calendarBody: ICalendar,
@@ -152,10 +153,14 @@ export class CalendarController extends Controller {
 				reqUser,
 				data: calendar
 			},
-			(user: IPublicUser, data: IPublicCalendar) => {
+			() => {
+				if (reqUser === null || calendar === null) {
+					throw new Error('Should not happen');
+				}
+
 				return this._authorizationService.isCalendarAccessible(
-					user,
-					data
+					reqUser,
+					calendar
 				);
 			}
 		);
@@ -206,10 +211,14 @@ export class CalendarController extends Controller {
 				reqUser,
 				data: calendar
 			},
-			(user: IPublicUser, data: IPublicCalendar) => {
+			() => {
+				if (reqUser === null || calendar === null) {
+					throw new Error('Should not happen');
+				}
+
 				return this._authorizationService.isCalendarAccessible(
-					user,
-					data
+					reqUser,
+					calendar
 				);
 			}
 		);
@@ -248,8 +257,15 @@ export class CalendarController extends Controller {
 				reqUser,
 				data: calendar
 			},
-			(user: IPublicUser, data: IPublicCalendar) => {
-				return this._authorizationService.isCalendarOwned(user, data);
+			() => {
+				if (reqUser === null || calendar === null) {
+					throw new Error('Should not happen');
+				}
+
+				return this._authorizationService.isCalendarOwned(
+					reqUser,
+					calendar
+				);
 			}
 		);
 	}

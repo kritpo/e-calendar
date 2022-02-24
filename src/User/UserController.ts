@@ -247,8 +247,12 @@ export class UserController extends Controller {
 				reqUser,
 				data: user
 			},
-			(user: IPublicUser, data: IPublicUser) => {
-				return this._authorizationService.isUserSelf(user, data);
+			() => {
+				if (reqUser === null || user === null) {
+					throw new Error('Should not happen');
+				}
+
+				return this._authorizationService.isUserSelf(reqUser, user);
 			}
 		);
 	}
@@ -285,8 +289,12 @@ export class UserController extends Controller {
 				reqUser,
 				data: user
 			},
-			(user: IPublicUser, data: IPublicUser) => {
-				return this._authorizationService.isUserSelf(user, data);
+			() => {
+				if (reqUser === null || user === null) {
+					throw new Error('Should not happen');
+				}
+
+				return this._authorizationService.isUserSelf(reqUser, user);
 			}
 		);
 	}

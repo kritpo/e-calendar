@@ -21,7 +21,7 @@ const calendarSchema = new Schema<ICalendarExtended>({
 	name: { type: String, required: true },
 	type: { type: String, enum: Object.keys(CalendarTypeEnum), required: true },
 	description: { type: String, required: true },
-	collaboratorsIds: [{ type: String, required: true }]
+	collaboratorsIds: [String]
 });
 
 export const Calendar = model('Calendar', calendarSchema);
