@@ -43,7 +43,7 @@ export const expressAuthentication: (
 				const userService = container.resolve(UserService);
 
 				return userService
-					.getUserById(userId)
+					.getById(userId)
 					.then((user) => {
 						if (user !== null) {
 							LOGGER.info(`${userId} is authenticated`);

@@ -41,7 +41,7 @@ export class UserService {
 	 * @param plainPassword the account plain password
 	 * @returns newly created account
 	 */
-	public async insertUserByUsernameAndPassword(
+	public async insert(
 		username: string,
 		plainPassword: string
 	): Promise<IPublicUser> {
@@ -61,7 +61,7 @@ export class UserService {
 	 *
 	 * @returns all users
 	 */
-	public async getAllUsers(): Promise<IPublicUser[]> {
+	public async getAll(): Promise<IPublicUser[]> {
 		const users = await User.find().exec();
 
 		LOGGER.info(`${users.length} users is retrieved`);
@@ -75,9 +75,7 @@ export class UserService {
 	 * @param username the username of the user to retrieve
 	 * @returns the found user
 	 */
-	public async getUserByUsername(
-		username: string
-	): Promise<IPublicUser | null> {
+	public async getByUsername(username: string): Promise<IPublicUser | null> {
 		const userData = { username };
 
 		const users = await User.find(userData).exec();
@@ -101,7 +99,7 @@ export class UserService {
 	 * @param plainPassword the plain password of the user to retrieve
 	 * @returns the found user
 	 */
-	public async getUserByUsernameAndPassword(
+	public async getByUsernameAndPassword(
 		username: string,
 		plainPassword: string
 	): Promise<IPublicUser | null> {
@@ -128,7 +126,7 @@ export class UserService {
 	 * @param userId the id of the user
 	 * @returns the found user
 	 */
-	public async getUserById(userId: string): Promise<IPublicUser | null> {
+	public async getById(userId: string): Promise<IPublicUser | null> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
 		if (user !== null) {
@@ -150,7 +148,7 @@ export class UserService {
 	 * @param plainNewPassword the new password
 	 * @returns if the update succeed
 	 */
-	public async updateUserById(
+	public async updateById(
 		userId: string,
 		newUsername?: string,
 		plainNewPassword?: string
@@ -186,7 +184,7 @@ export class UserService {
 	 * @param userId the id of the user
 	 * @returns if the deletion succeed
 	 */
-	public async deleteUserById(userId: string): Promise<boolean> {
+	public async deleteById(userId: string): Promise<boolean> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
 		if (user === null) {

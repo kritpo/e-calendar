@@ -53,7 +53,7 @@ export class CalendarController extends Controller {
 	 * @returns List of calendars
 	 */
 	@Get('/')
-	public async getAll(
+	public async getAllCalendars(
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
 	): Promise<IPublicCalendar[]> {
@@ -65,7 +65,7 @@ export class CalendarController extends Controller {
 					throw new Error('Should not happen');
 				}
 
-				return this._calendarService.getAllCalendars(reqUser.id);
+				return this._calendarService.getAll(reqUser.id);
 			},
 			{
 				notAuthenticatedResponse,
@@ -100,7 +100,7 @@ export class CalendarController extends Controller {
 					throw new Error('Should not happen');
 				}
 
-				return this._calendarService.insertCalendar(
+				return this._calendarService.insert(
 					reqUser.id,
 					calendarBody.name,
 					calendarBody.type,
@@ -135,9 +135,7 @@ export class CalendarController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<IPublicCalendar> {
 		const reqUser = getUserFromRequest(req);
-		const calendar = await this._calendarService.getCalendarById(
-			calendarId
-		);
+		const calendar = await this._calendarService.getById(calendarId);
 
 		return generateResponse(
 			() => {
@@ -189,13 +187,11 @@ export class CalendarController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<void> {
 		const reqUser = getUserFromRequest(req);
-		const calendar = await this._calendarService.getCalendarById(
-			calendarId
-		);
+		const calendar = await this._calendarService.getById(calendarId);
 
 		return generateResponse(
 			async () => {
-				await this._calendarService.updateCalendarById(
+				await this._calendarService.updateById(
 					calendarId,
 					newCalendarBody.name,
 					newCalendarBody.type,
@@ -239,13 +235,11 @@ export class CalendarController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
 	): Promise<void> {
 		const reqUser = getUserFromRequest(req);
-		const calendar = await this._calendarService.getCalendarById(
-			calendarId
-		);
+		const calendar = await this._calendarService.getById(calendarId);
 
 		return generateResponse(
 			async () => {
-				await this._calendarService.deleteCalendarById(calendarId);
+				await this._calendarService.deleteById(calendarId);
 			},
 			{
 				notAuthenticatedResponse,

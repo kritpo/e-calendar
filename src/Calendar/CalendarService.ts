@@ -47,7 +47,7 @@ export class CalendarService {
 	 * @param collaboratorsIds the calendar collaborators ids
 	 * @returns newly created calendar
 	 */
-	public async insertCalendar(
+	public async insert(
 		ownerId: string,
 		name: string,
 		type: CalendarTypeEnum,
@@ -77,7 +77,7 @@ export class CalendarService {
 	 * @param userId the user id
 	 * @returns all calendars
 	 */
-	public async getAllCalendars(userId: string): Promise<IPublicCalendar[]> {
+	public async getAll(userId: string): Promise<IPublicCalendar[]> {
 		const calendars = await Calendar.find({
 			$or: [
 				{ type: CalendarTypeEnum.PUBLIC },
@@ -99,9 +99,7 @@ export class CalendarService {
 	 * @param calendarId the id of the calendar
 	 * @returns the found calendar
 	 */
-	public async getCalendarById(
-		calendarId: string
-	): Promise<IPublicCalendar | null> {
+	public async getById(calendarId: string): Promise<IPublicCalendar | null> {
 		const calendar = await Calendar.findById(
 			new Types.ObjectId(calendarId)
 		).exec();
@@ -127,7 +125,7 @@ export class CalendarService {
 	 * @param newCollaboratorsIds the calendar new collaborators ids
 	 * @returns if the update succeed
 	 */
-	public async updateCalendarById(
+	public async updateById(
 		calendarId: string,
 		newName?: string,
 		newType?: CalendarTypeEnum,
@@ -176,7 +174,7 @@ export class CalendarService {
 	 * @param calendarId the id of the calendar
 	 * @returns if the deletion succeed
 	 */
-	public async deleteCalendarById(calendarId: string): Promise<boolean> {
+	public async deleteById(calendarId: string): Promise<boolean> {
 		const calendar = await Calendar.findById(
 			new Types.ObjectId(calendarId)
 		).exec();
