@@ -16,7 +16,10 @@ import {
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
-import { checkExistence } from '../utils/checkExistance';
+import {
+	checkExistence,
+	checkExistenceOrShouldNotHappen
+} from '../utils/checkExistance';
 import { generateErrorResponse } from '../utils/response/generateErrorResponse';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
@@ -110,7 +113,7 @@ export class UserController extends Controller {
 	public async loginUser(
 		@Body() userBody: IUser,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<ISecurityTokens> {
+	): Promise<ISecurityTokens | undefined> {
 		const reqUser = await this._userService.getByUsernameAndPassword(
 			userBody.username,
 			userBody.password
@@ -118,11 +121,9 @@ export class UserController extends Controller {
 
 		return generateResponse(
 			() => {
-				if (reqUser === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					return this._securityService.createToken(reqUser.id);
 				}
-
-				return this._securityService.createToken(reqUser.id);
 			},
 			{
 				notAuthenticatedResponse,
@@ -190,16 +191,14 @@ export class UserController extends Controller {
 	public async getUser(
 		@Path() userId: string,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicUser> {
+	): Promise<IPublicUser | undefined> {
 		const user = await this._userService.getById(userId);
 
 		return generateResponse(
 			() => {
-				if (user === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(user)) {
+					return user;
 				}
-
-				return user;
 			},
 			{
 				notFoundResponse,
@@ -265,11 +264,10 @@ export class UserController extends Controller {
 				data: user
 			},
 			() => {
-				if (reqUser === null || user === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isUserSelf(reqUser, user);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(user)
+					? this._authorizationService.isUserSelf(reqUser, user)
+					: false;
 			}
 		);
 	}
@@ -307,11 +305,10 @@ export class UserController extends Controller {
 				data: user
 			},
 			() => {
-				if (reqUser === null || user === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isUserSelf(reqUser, user);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(user)
+					? this._authorizationService.isUserSelf(reqUser, user)
+					: false;
 			}
 		);
 	}

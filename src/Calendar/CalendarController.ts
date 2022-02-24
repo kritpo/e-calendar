@@ -16,6 +16,7 @@ import {
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
+import { checkExistenceOrShouldNotHappen } from '../utils/checkExistance';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
@@ -56,16 +57,14 @@ export class CalendarController extends Controller {
 	public async getAllCalendars(
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<IPublicCalendar[]> {
+	): Promise<IPublicCalendar[] | undefined> {
 		const reqUser = getUserFromRequest(req);
 
 		return generateResponse(
 			async () => {
-				if (reqUser === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					return this._calendarService.getAll(reqUser.id);
 				}
-
-				return this._calendarService.getAll(reqUser.id);
 			},
 			{
 				notAuthenticatedResponse,
@@ -92,22 +91,20 @@ export class CalendarController extends Controller {
 		@Body() calendarBody: ICalendar,
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<IPublicCalendar> {
+	): Promise<IPublicCalendar | undefined> {
 		const reqUser = getUserFromRequest(req);
 
 		return generateResponse(
 			async () => {
-				if (reqUser === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					return this._calendarService.insert(
+						reqUser.id,
+						calendarBody.name,
+						calendarBody.type,
+						calendarBody.description,
+						calendarBody.collaboratorsIds
+					);
 				}
-
-				return this._calendarService.insert(
-					reqUser.id,
-					calendarBody.name,
-					calendarBody.type,
-					calendarBody.description,
-					calendarBody.collaboratorsIds
-				);
 			},
 			{
 				notAuthenticatedResponse,
@@ -134,17 +131,15 @@ export class CalendarController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicCalendar> {
+	): Promise<IPublicCalendar | undefined> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 
 		return generateResponse(
 			() => {
-				if (calendar === null) {
-					throw new Error('Should not happen');
+				if (checkExistenceOrShouldNotHappen(calendar)) {
+					return calendar;
 				}
-
-				return calendar;
 			},
 			{
 				notAuthenticatedResponse,
@@ -154,14 +149,13 @@ export class CalendarController extends Controller {
 				data: calendar
 			},
 			() => {
-				if (reqUser === null || calendar === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isCalendarAccessible(
-					reqUser,
-					calendar
-				);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(calendar)
+					? this._authorizationService.isCalendarAccessible(
+							reqUser,
+							calendar
+					  )
+					: false;
 			}
 		);
 	}
@@ -212,14 +206,12 @@ export class CalendarController extends Controller {
 				data: calendar
 			},
 			() => {
-				if (reqUser === null || calendar === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isCalendarAccessible(
-					reqUser,
-					calendar
-				);
+				return reqUser && checkExistenceOrShouldNotHappen(calendar)
+					? this._authorizationService.isCalendarAccessible(
+							reqUser,
+							calendar
+					  )
+					: false;
 			}
 		);
 	}
@@ -258,14 +250,13 @@ export class CalendarController extends Controller {
 				data: calendar
 			},
 			() => {
-				if (reqUser === null || calendar === null) {
-					throw new Error('Should not happen');
-				}
-
-				return this._authorizationService.isCalendarOwned(
-					reqUser,
-					calendar
-				);
+				return checkExistenceOrShouldNotHappen(reqUser) &&
+					checkExistenceOrShouldNotHappen(calendar)
+					? this._authorizationService.isCalendarOwned(
+							reqUser,
+							calendar
+					  )
+					: false;
 			}
 		);
 	}
