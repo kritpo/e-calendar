@@ -17,6 +17,7 @@ import {
 } from 'tsoa';
 import { injectable } from 'tsyringe';
 import { generateErrorResponse } from '../utils/response/generateErrorResponse';
+import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
 import { getUserFromRequest } from '../utils/security/getUserFromRequest';
@@ -26,14 +27,6 @@ import {
 } from '../utils/security/SecurityService';
 import { IPublicUser, IUser } from './User';
 import { UserService } from './UserService';
-
-interface IGenerateResponseParams {
-	notAuthenticatedResponse?: TsoaResponse<401, IErrorResponse> | null;
-	notAuthorizedResponse?: TsoaResponse<403, IErrorResponse> | null;
-	notFoundResponse?: TsoaResponse<404, IErrorResponse> | null;
-	user?: IPublicUser | null;
-	reqUser?: IPublicUser | null;
-}
 
 interface ITokenBody {
 	refreshToken: string;
@@ -48,64 +41,6 @@ interface ITokenBody {
 @Security('token')
 @Route('/users')
 export class UserController extends Controller {
-	/**
-	 * generate response
-	 *
-	 * @param cb the main response function
-	 * @param params the generator params
-	 * @param params.notAuthenticatedResponse Not Authenticated
-	 * @param params.notAuthorizedResponse Not Authorized
-	 * @param params.notFoundResponse Content not found
-	 * @param params.user the user to access
-	 * @param params.reqUser the user who access to ressource
-	 * @returns the generated response or null if no error response is generated
-	 */
-	private async _generateResponse<T>(
-		cb: () => T | Promise<T>,
-		params: IGenerateResponseParams
-	): Promise<T> {
-		if (
-			params.notFoundResponse !== undefined &&
-			params.notFoundResponse !== null &&
-			(params.user === undefined || params.user === null)
-		) {
-			return generateErrorResponse<404, T>(
-				params.notFoundResponse,
-				404,
-				'Not Found'
-			);
-		} else if (
-			params.notAuthenticatedResponse !== undefined &&
-			params.notAuthenticatedResponse !== null &&
-			(params.reqUser === undefined || params.reqUser === null)
-		) {
-			return generateErrorResponse<401, T>(
-				params.notAuthenticatedResponse,
-				401,
-				'Not Authenticated'
-			);
-		} else if (
-			params.notAuthorizedResponse !== undefined &&
-			params.notAuthorizedResponse !== null &&
-			(params.reqUser === undefined ||
-				params.reqUser === null ||
-				params.user === undefined ||
-				params.user === null ||
-				!this._authorizationService.isUserSelf(
-					params.reqUser,
-					params.user
-				))
-		) {
-			return generateErrorResponse<403, T>(
-				params.notAuthorizedResponse,
-				403,
-				'Not Authorized'
-			);
-		}
-
-		return await cb();
-	}
-
 	/**
 	 * create a user controller
 	 *
@@ -183,7 +118,7 @@ export class UserController extends Controller {
 			userBody.password
 		);
 
-		return this._generateResponse(
+		return generateResponse(
 			() => {
 				if (reqUser === null) {
 					throw new Error('Should not happen');
@@ -217,7 +152,7 @@ export class UserController extends Controller {
 	): Promise<ISecurityTokens> {
 		const user = await this._userService.getById(userId);
 
-		return this._generateResponse(
+		return generateResponse(
 			() => {
 				if (user !== null) {
 					const response =
@@ -240,9 +175,8 @@ export class UserController extends Controller {
 				throw new Error('Should not happen');
 			},
 			{
-				notAuthorizedResponse,
 				notFoundResponse,
-				user
+				data: user
 			}
 		);
 	}
@@ -261,7 +195,7 @@ export class UserController extends Controller {
 	): Promise<IPublicUser> {
 		const user = await this._userService.getById(userId);
 
-		return this._generateResponse(
+		return generateResponse(
 			() => {
 				if (user === null) {
 					throw new Error('Should not happen');
@@ -271,7 +205,7 @@ export class UserController extends Controller {
 			},
 			{
 				notFoundResponse,
-				user
+				data: user
 			}
 		);
 	}
@@ -301,7 +235,7 @@ export class UserController extends Controller {
 		const reqUser = getUserFromRequest(req);
 		const user = await this._userService.getById(userId);
 
-		return this._generateResponse(
+		return generateResponse(
 			async () => {
 				await this._userService.updateById(
 					userId,
@@ -313,8 +247,11 @@ export class UserController extends Controller {
 				notAuthenticatedResponse,
 				notAuthorizedResponse,
 				notFoundResponse,
-				user,
-				reqUser
+				reqUser,
+				data: user
+			},
+			(user: IPublicUser, data: IPublicUser) => {
+				return this._authorizationService.isUserSelf(user, data);
 			}
 		);
 	}
@@ -340,7 +277,7 @@ export class UserController extends Controller {
 		const reqUser = getUserFromRequest(req);
 		const user = await this._userService.getById(userId);
 
-		return this._generateResponse(
+		return generateResponse(
 			async () => {
 				await this._userService.deleteById(userId);
 			},
@@ -348,8 +285,11 @@ export class UserController extends Controller {
 				notAuthenticatedResponse,
 				notAuthorizedResponse,
 				notFoundResponse,
-				user,
-				reqUser
+				reqUser,
+				data: user
+			},
+			(user: IPublicUser, data: IPublicUser) => {
+				return this._authorizationService.isUserSelf(user, data);
 			}
 		);
 	}
