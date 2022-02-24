@@ -3,6 +3,7 @@ import { container } from 'tsyringe';
 
 import { IPublicUser } from '../../User/User';
 import { UserService } from '../../User/UserService';
+import { checkExistence } from '../checkExistance';
 import { getLogger } from '../logging/getLogger';
 import { SecurityService } from '../security/SecurityService';
 
@@ -39,13 +40,13 @@ export const expressAuthentication: (
 			const securityService = container.resolve(SecurityService);
 			const userId = securityService.getUserIDFromAccessToken(token);
 
-			if (userId !== null) {
+			if (checkExistence(userId)) {
 				const userService = container.resolve(UserService);
 
 				return userService
 					.getById(userId)
 					.then((user) => {
-						if (user !== null) {
+						if (checkExistence(user)) {
 							LOGGER.info(`${userId} is authenticated`);
 
 							return user;

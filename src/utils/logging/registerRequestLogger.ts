@@ -2,6 +2,7 @@
 import { Express, Request } from 'express';
 import morgan from 'morgan';
 
+import { checkExistence } from '../checkExistance';
 import { getLogger } from './getLogger';
 
 const LOGGER = getLogger('REQUEST');
@@ -9,7 +10,7 @@ const LOGGER = getLogger('REQUEST');
 morgan.token<Request>('parameters', (req) => {
 	let body = req.body as unknown;
 
-	if (body !== null && typeof body === 'object') {
+	if (checkExistence(body) && typeof body === 'object') {
 		let maskedBody = JSON.stringify(body, null, 2);
 		maskedBody = maskedBody.replace(
 			/"password": ".+",?\n/g,

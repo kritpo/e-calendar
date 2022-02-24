@@ -1,7 +1,9 @@
 import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
+import { AbstractBaseService } from '../Base/BaseService';
 import { EventService } from '../Event/EventService';
+import { checkExistence } from '../utils/checkExistance';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import {
@@ -18,13 +20,18 @@ const LOGGER = getLogger('CalendarService');
  */
 @singleton()
 @injectable()
-export class CalendarService {
+export class CalendarService extends AbstractBaseService<
+	ICalendarExtended,
+	IPublicCalendar
+> {
 	/**
 	 * inject dependencies
 	 *
 	 * @param _eventService the service which manage event
 	 */
-	constructor(private _eventService: EventService) {}
+	constructor(private _eventService: EventService) {
+		super();
+	}
 
 	/**
 	 * retrieve the public calendar
@@ -32,7 +39,7 @@ export class CalendarService {
 	 * @param calendar the calendar document
 	 * @returns the public calendar
 	 */
-	private async _retrievePublicCalendar(
+	protected async _retrievePublicType(
 		calendar: HydratedDocument<ICalendarExtended>
 	): Promise<IPublicCalendar> {
 		const calendarId = getDocumentId(calendar).toString();
@@ -77,12 +84,11 @@ export class CalendarService {
 					: [...new Set(collaboratorsIds)]
 		};
 
-		const calendar = new Calendar(calendarData);
-		await calendar.save();
+		const calendar = await this._insert(Calendar, calendarData);
 
 		LOGGER.info(`${calendar.name} is created`);
 
-		return this._retrievePublicCalendar(calendar);
+		return calendar;
 	}
 
 	/**
@@ -104,7 +110,7 @@ export class CalendarService {
 
 		return Promise.all(
 			calendars.map(
-				async (calendar) => await this._retrievePublicCalendar(calendar)
+				async (calendar) => await this._retrievePublicType(calendar)
 			)
 		);
 	}
@@ -116,19 +122,15 @@ export class CalendarService {
 	 * @returns the found calendar
 	 */
 	public async getById(calendarId: string): Promise<IPublicCalendar | null> {
-		const calendar = await Calendar.findById(
-			new Types.ObjectId(calendarId)
-		).exec();
+		const calendar = await this._getByIdPublicType(Calendar, calendarId);
 
-		if (calendar !== null) {
-			LOGGER.info(`${calendarId} is retrieved`);
+		LOGGER.info(
+			checkExistence(calendar)
+				? `${calendarId} is retrieved`
+				: `${calendarId} does not exist and its not retrieved`
+		);
 
-			return this._retrievePublicCalendar(calendar);
-		}
-
-		LOGGER.info(`${calendarId} does not exist and its not retrieved`);
-
-		return null;
+		return calendar;
 	}
 
 	/**
@@ -152,28 +154,28 @@ export class CalendarService {
 			new Types.ObjectId(calendarId)
 		).exec();
 
-		if (calendar === null) {
+		if (!checkExistence(calendar)) {
 			LOGGER.info(`${calendarId} does not exist and its not retrieved`);
 
 			return false;
 		}
 
-		if (newName !== undefined) {
+		if (checkExistence(newName)) {
 			calendar.name = newName;
 		}
 
-		if (newType !== undefined) {
+		if (checkExistence(newType)) {
 			calendar.type = newType;
 		}
 
-		if (newDescription !== undefined) {
+		if (checkExistence(newDescription)) {
 			calendar.description = newDescription;
 		}
 
 		calendar.collaboratorsIds =
 			calendar.type === CalendarTypeEnum.PRIVATE
 				? []
-				: newCollaboratorsIds !== undefined
+				: checkExistence(newCollaboratorsIds)
 				? [...new Set(newCollaboratorsIds)]
 				: calendar.collaboratorsIds;
 
@@ -191,11 +193,9 @@ export class CalendarService {
 	 * @returns if the deletion succeed
 	 */
 	public async deleteById(calendarId: string): Promise<boolean> {
-		const calendar = await Calendar.findById(
-			new Types.ObjectId(calendarId)
-		).exec();
+		const calendar = await this._getById(Calendar, calendarId);
 
-		if (calendar === null) {
+		if (!checkExistence(calendar)) {
 			LOGGER.info(`${calendarId} does not exist and its not retrieved`);
 
 			return false;

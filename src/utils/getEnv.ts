@@ -1,3 +1,5 @@
+import { checkExistence } from './checkExistance';
+
 /**
  * retrieve the env variable
  *
@@ -8,11 +10,11 @@
 export const getEnv = (name: string, defaultValue?: string): string => {
 	const data = process.env[name];
 
-	if (data !== undefined) {
+	if (checkExistence(data)) {
 		return data;
 	}
 
-	if (defaultValue !== undefined) {
+	if (checkExistence(defaultValue)) {
 		return defaultValue;
 	}
 

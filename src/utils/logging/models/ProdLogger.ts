@@ -1,3 +1,4 @@
+import { checkExistence } from '../../checkExistance';
 import { LoggingLevelEnum } from '../types';
 import { AbstractLogger } from './AbstractLogger';
 
@@ -22,7 +23,7 @@ export class ProdLogger extends AbstractLogger {
 		const date = new Date().toISOString();
 
 		let error: ILogError | undefined;
-		if (level !== LoggingLevelEnum.INFO && err !== undefined) {
+		if (level !== LoggingLevelEnum.INFO && checkExistence(err)) {
 			error = {
 				name: err.name,
 				message: err.message,

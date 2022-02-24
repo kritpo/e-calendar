@@ -6,6 +6,8 @@ import { HydratedDocument, ObjectId } from 'mongoose';
  * @param document the document to check
  * @returns the retrieved document id
  */
-export const getDocumentId = <T>(document: HydratedDocument<T>): ObjectId => {
+export const getDocumentId = <BaseType>(
+	document: HydratedDocument<BaseType>
+): ObjectId => {
 	return document._id as ObjectId;
 };

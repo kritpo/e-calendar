@@ -1,6 +1,8 @@
 import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
+import { AbstractBaseService } from '../Base/BaseService';
+import { checkExistence } from '../utils/checkExistance';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import {
@@ -18,14 +20,17 @@ const LOGGER = getLogger('EventService');
  */
 @singleton()
 @injectable()
-export class EventService {
+export class EventService extends AbstractBaseService<
+	IEventExtended,
+	IPublicEvent
+> {
 	/**
 	 * retrieve the public event
 	 *
 	 * @param event the event document
 	 * @returns the public event
 	 */
-	private _retrievePublicEvent(
+	protected _retrievePublicType(
 		event: HydratedDocument<IEventExtended>
 	): IPublicEvent {
 		return {
@@ -77,12 +82,11 @@ export class EventService {
 			recurrence
 		};
 
-		const event = new Event(eventData);
-		await event.save();
+		const event = await this._insert(Event, eventData);
 
 		LOGGER.info(`${event.name} is created`);
 
-		return this._retrievePublicEvent(event);
+		return event;
 	}
 
 	/**
@@ -96,7 +100,7 @@ export class EventService {
 
 		LOGGER.info(`${events.length} events are retrieved`);
 
-		return events.map((event) => this._retrievePublicEvent(event));
+		return events.map((event) => this._retrievePublicType(event));
 	}
 
 	/**
@@ -110,17 +114,17 @@ export class EventService {
 		calendarId: string,
 		eventId: string
 	): Promise<IPublicEvent | null> {
-		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
+		const event = await this._getByIdPublicType(Event, eventId);
+		const isCorrect =
+			checkExistence(event) && event.calendarId === calendarId;
 
-		if (event !== null && event.calendarId === calendarId) {
-			LOGGER.info(`${eventId} is retrieved`);
+		LOGGER.info(
+			isCorrect
+				? `${eventId} is retrieved`
+				: `${eventId} does not exist and its not retrieved`
+		);
 
-			return this._retrievePublicEvent(event);
-		}
-
-		LOGGER.info(`${eventId} does not exist and its not retrieved`);
-
-		return null;
+		return isCorrect ? event : null;
 	}
 
 	/**
@@ -152,39 +156,39 @@ export class EventService {
 	): Promise<boolean> {
 		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
 
-		if (event === null || event.calendarId !== calendarId) {
+		if (!checkExistence(event) || event.calendarId !== calendarId) {
 			LOGGER.info(`${eventId} does not exist and its not retrieved`);
 
 			return false;
 		}
 
-		if (newName !== undefined) {
+		if (checkExistence(newName)) {
 			event.name = newName;
 		}
 
-		if (newStartTime !== undefined) {
+		if (checkExistence(newStartTime)) {
 			event.startTime = newStartTime;
 		}
 
-		if (newEndTime !== undefined) {
+		if (checkExistence(newEndTime)) {
 			event.endTime = newEndTime;
 		}
 
-		if (newPlace !== undefined) {
+		if (checkExistence(newPlace)) {
 			event.place = newPlace;
 		}
 
-		if (newDescription !== undefined) {
+		if (checkExistence(newDescription)) {
 			event.description = newDescription;
 		}
 
-		if (newParticipantsIds !== undefined) {
+		if (checkExistence(newParticipantsIds)) {
 			event.participantsIds = [
 				...new Set([userId, ...newParticipantsIds])
 			];
 		}
 
-		if (newRecurrence !== undefined) {
+		if (checkExistence(newRecurrence)) {
 			event.recurrence = newRecurrence;
 		}
 
@@ -206,9 +210,9 @@ export class EventService {
 		calendarId: string,
 		eventId: string
 	): Promise<boolean> {
-		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
+		const event = await this._getById(Event, eventId);
 
-		if (event === null || event.calendarId !== calendarId) {
+		if (!checkExistence(event) || event.calendarId !== calendarId) {
 			LOGGER.info(`${eventId} does not exist and its not retrieved`);
 
 			return false;

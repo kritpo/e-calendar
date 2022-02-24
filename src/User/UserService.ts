@@ -1,6 +1,8 @@
 import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
+import { AbstractBaseService } from '../Base/BaseService';
+import { checkExistence } from '../utils/checkExistance';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import { SecurityService } from '../utils/security/SecurityService';
@@ -13,13 +15,15 @@ const LOGGER = getLogger('UserService');
  */
 @singleton()
 @injectable()
-export class UserService {
+export class UserService extends AbstractBaseService<IUser, IPublicUser> {
 	/**
 	 * inject dependencies
 	 *
 	 * @param _securityService the service which manage security
 	 */
-	constructor(private _securityService: SecurityService) {}
+	constructor(private _securityService: SecurityService) {
+		super();
+	}
 
 	/**
 	 * retrieve the public user
@@ -27,7 +31,7 @@ export class UserService {
 	 * @param user the user document
 	 * @returns the public user
 	 */
-	private _retrievePublicUser(user: HydratedDocument<IUser>): IPublicUser {
+	protected _retrievePublicType(user: HydratedDocument<IUser>): IPublicUser {
 		return {
 			id: getDocumentId(user).toString(),
 			username: user.username
@@ -48,12 +52,11 @@ export class UserService {
 		const password = this._securityService.hashPassword(plainPassword);
 		const userData: IUser = { username, password };
 
-		const user = new User(userData);
-		await user.save();
+		const user = await this._insert(User, userData);
 
 		LOGGER.info(`${user.username} is created`);
 
-		return this._retrievePublicUser(user);
+		return user;
 	}
 
 	/**
@@ -66,7 +69,7 @@ export class UserService {
 
 		LOGGER.info(`${users.length} users is retrieved`);
 
-		return users.map((user) => this._retrievePublicUser(user));
+		return users.map((user) => this._retrievePublicType(user));
 	}
 
 	/**
@@ -81,10 +84,10 @@ export class UserService {
 		const users = await User.find(userData).exec();
 		const user = users[0];
 
-		if (user !== undefined) {
+		if (checkExistence(user)) {
 			LOGGER.info(`${user.username} is retrieved`);
 
-			return this._retrievePublicUser(user);
+			return this._retrievePublicType(user);
 		}
 
 		LOGGER.info(`${username} does not exist and its not retrieved`);
@@ -109,10 +112,10 @@ export class UserService {
 		const users = await User.find(userData).exec();
 		const user = users[0];
 
-		if (user !== undefined) {
+		if (checkExistence(user)) {
 			LOGGER.info(`${user.username} is retrieved`);
 
-			return this._retrievePublicUser(user);
+			return this._retrievePublicType(user);
 		}
 
 		LOGGER.info(`${username} does not exist and its not retrieved`);
@@ -127,17 +130,15 @@ export class UserService {
 	 * @returns the found user
 	 */
 	public async getById(userId: string): Promise<IPublicUser | null> {
-		const user = await User.findById(new Types.ObjectId(userId)).exec();
+		const user = await this._getByIdPublicType(User, userId);
 
-		if (user !== null) {
-			LOGGER.info(`${userId} is retrieved`);
+		LOGGER.info(
+			checkExistence(user)
+				? `${userId} is retrieved`
+				: `${userId} does not exist and its not retrieved`
+		);
 
-			return this._retrievePublicUser(user);
-		}
-
-		LOGGER.info(`${userId} does not exist and its not retrieved`);
-
-		return null;
+		return user;
 	}
 
 	/**
@@ -155,17 +156,17 @@ export class UserService {
 	): Promise<boolean> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
-		if (user === null) {
+		if (!checkExistence(user)) {
 			LOGGER.info(`${userId} does not exist and its not retrieved`);
 
 			return false;
 		}
 
-		if (newUsername !== undefined) {
+		if (checkExistence(newUsername)) {
 			user.username = newUsername;
 		}
 
-		if (plainNewPassword !== undefined) {
+		if (checkExistence(plainNewPassword)) {
 			const newPassword =
 				this._securityService.hashPassword(plainNewPassword);
 			user.password = newPassword;
@@ -185,9 +186,9 @@ export class UserService {
 	 * @returns if the deletion succeed
 	 */
 	public async deleteById(userId: string): Promise<boolean> {
-		const user = await User.findById(new Types.ObjectId(userId)).exec();
+		const user = await this._getById(User, userId);
 
-		if (user === null) {
+		if (!checkExistence(user)) {
 			LOGGER.info(`${userId} does not exist and its not retrieved`);
 
 			return false;

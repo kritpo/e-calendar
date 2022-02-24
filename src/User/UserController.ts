@@ -16,6 +16,7 @@ import {
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
+import { checkExistence } from '../utils/checkExistance';
 import { generateErrorResponse } from '../utils/response/generateErrorResponse';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
@@ -83,7 +84,7 @@ export class UserController extends Controller {
 	): Promise<IPublicUser> {
 		const user = await this._userService.getByUsername(userBody.username);
 
-		if (user !== null) {
+		if (checkExistence(user)) {
 			return generateErrorResponse<409, IPublicUser>(
 				conflictResponse,
 				409,
@@ -151,14 +152,14 @@ export class UserController extends Controller {
 
 		return generateResponse(
 			() => {
-				if (user !== null) {
+				if (checkExistence(user)) {
 					const response =
 						this._securityService.updateAccessTokenToken(
 							user.id,
 							tokenBody.refreshToken
 						);
 
-					if (response !== null) {
+					if (checkExistence(response)) {
 						return response;
 					}
 
@@ -231,12 +232,12 @@ export class UserController extends Controller {
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>,
 		@Res() conflictResponse: TsoaResponse<409, IErrorResponse>
 	): Promise<void> {
-		if (newUserBody.username !== undefined) {
+		if (checkExistence(newUserBody.username)) {
 			const tempUser = await this._userService.getByUsername(
 				newUserBody.username
 			);
 
-			if (tempUser !== null) {
+			if (checkExistence(tempUser)) {
 				return generateErrorResponse<409, void>(
 					conflictResponse,
 					409,
