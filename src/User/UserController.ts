@@ -211,24 +211,40 @@ export class UserController extends Controller {
 	 * update the user
 	 *
 	 * @param userId the user id
-	 * @param userBody the new user data (all properties are optional)
-	 * @param userBody.username the user new username
-	 * @param userBody.password the user new plain password
+	 * @param newUserBody the new user data (all properties are optional)
+	 * @param newUserBody.username the user new username
+	 * @param newUserBody.password the user new plain password
 	 * @param req the express request
 	 * @param notAuthenticatedResponse Not Authenticated
 	 * @param notAuthorizedResponse Not Authorized
 	 * @param notFoundResponse Not Found
+	 * @param conflictResponse Conflict
 	 * @returns No content
 	 */
 	@Put('/{userId}')
 	public async updateUser(
 		@Path() userId: string,
-		@Body() userBody: Partial<IUser>,
+		@Body() newUserBody: Partial<IUser>,
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
-		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
+		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>,
+		@Res() conflictResponse: TsoaResponse<409, IErrorResponse>
 	): Promise<void> {
+		if (newUserBody.username !== undefined) {
+			const tempUser = await this._userService.getByUsername(
+				newUserBody.username
+			);
+
+			if (tempUser !== null) {
+				return generateErrorResponse<409, void>(
+					conflictResponse,
+					409,
+					'Conflict'
+				);
+			}
+		}
+
 		const reqUser = getUserFromRequest(req);
 		const user = await this._userService.getById(userId);
 
@@ -236,8 +252,8 @@ export class UserController extends Controller {
 			async () => {
 				await this._userService.updateById(
 					userId,
-					userBody.username,
-					userBody.password
+					newUserBody.username,
+					newUserBody.password
 				);
 			},
 			{
@@ -247,8 +263,12 @@ export class UserController extends Controller {
 				reqUser,
 				data: user
 			},
-			(user: IPublicUser, data: IPublicUser) => {
-				return this._authorizationService.isUserSelf(user, data);
+			() => {
+				if (reqUser === null || user === null) {
+					throw new Error('Should not happen');
+				}
+
+				return this._authorizationService.isUserSelf(reqUser, user);
 			}
 		);
 	}
@@ -285,8 +305,12 @@ export class UserController extends Controller {
 				reqUser,
 				data: user
 			},
-			(user: IPublicUser, data: IPublicUser) => {
-				return this._authorizationService.isUserSelf(user, data);
+			() => {
+				if (reqUser === null || user === null) {
+					throw new Error('Should not happen');
+				}
+
+				return this._authorizationService.isUserSelf(reqUser, user);
 			}
 		);
 	}

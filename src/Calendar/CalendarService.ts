@@ -1,6 +1,7 @@
 import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
+import { EventService } from '../Event/EventService';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import {
@@ -19,16 +20,27 @@ const LOGGER = getLogger('CalendarService');
 @injectable()
 export class CalendarService {
 	/**
+	 * inject dependencies
+	 *
+	 * @param _eventService the service which manage event
+	 */
+	constructor(private _eventService: EventService) {}
+
+	/**
 	 * retrieve the public calendar
 	 *
 	 * @param calendar the calendar document
 	 * @returns the public calendar
 	 */
-	private _retrievePublicCalendar(
+	private async _retrievePublicCalendar(
 		calendar: HydratedDocument<ICalendarExtended>
-	): IPublicCalendar {
+	): Promise<IPublicCalendar> {
+		const calendarId = getDocumentId(calendar).toString();
+		const events = await this._eventService.getAll(calendarId);
+
 		return {
-			id: getDocumentId(calendar).toString(),
+			id: calendarId,
+			eventsIds: events.map((event) => event.id),
 			ownerId: calendar.ownerId,
 			name: calendar.name,
 			type: calendar.type,
@@ -60,7 +72,9 @@ export class CalendarService {
 			type,
 			description,
 			collaboratorsIds:
-				type === CalendarTypeEnum.PRIVATE ? [] : collaboratorsIds
+				type === CalendarTypeEnum.PRIVATE
+					? []
+					: [...new Set(collaboratorsIds)]
 		};
 
 		const calendar = new Calendar(calendarData);
@@ -88,8 +102,10 @@ export class CalendarService {
 
 		LOGGER.info(`${calendars.length} calendars is retrieved`);
 
-		return calendars.map((calendar) =>
-			this._retrievePublicCalendar(calendar)
+		return Promise.all(
+			calendars.map(
+				async (calendar) => await this._retrievePublicCalendar(calendar)
+			)
 		);
 	}
 
@@ -158,7 +174,7 @@ export class CalendarService {
 			calendar.type === CalendarTypeEnum.PRIVATE
 				? []
 				: newCollaboratorsIds !== undefined
-				? newCollaboratorsIds
+				? [...new Set(newCollaboratorsIds)]
 				: calendar.collaboratorsIds;
 
 		await calendar.save();

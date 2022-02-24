@@ -69,7 +69,7 @@ app.use((err: unknown, _: unknown, res: Response, next: NextFunction) => {
 			message: 'Bad Request'
 		});
 
-		LOGGER.warn('Error 400: Bad Request - Malformed JSON');
+		LOGGER.warn('Error 400: Bad Request - Malformed JSON', err);
 
 		return;
 	}

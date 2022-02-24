@@ -28,7 +28,7 @@ interface IGenerateResponseParams<T> {
 export const generateResponse = async <T, U>(
 	cb: () => T | Promise<T>,
 	params: IGenerateResponseParams<U>,
-	authorizer?: (user: IPublicUser, data: U) => boolean | null
+	authorizer?: () => boolean | null
 ): Promise<T> => {
 	if (
 		params.notFoundResponse !== undefined &&
@@ -59,7 +59,7 @@ export const generateResponse = async <T, U>(
 			params.reqUser === null ||
 			params.data === undefined ||
 			params.data === null ||
-			!authorizer(params.reqUser, params.data))
+			!authorizer())
 	) {
 		return generateErrorResponse<403, T>(
 			params.notAuthorizedResponse,
