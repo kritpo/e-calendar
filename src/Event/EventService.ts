@@ -1,10 +1,15 @@
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
-import { IUser } from '../User/User';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
-import { Event, IDate, IEvent, IPublicEvent, IRecurrence } from './Event';
+import {
+	Event,
+	IDate,
+	IEventExtended,
+	IPublicEvent,
+	IRecurrence
+} from './Event';
 
 const LOGGER = getLogger('EventService');
 
@@ -15,114 +20,61 @@ const LOGGER = getLogger('EventService');
 @injectable()
 export class EventService {
 	/**
-	 * retrieve all events
+	 * retrieve the public event
 	 *
-	 * @returns all events
+	 * @param event the event document
+	 * @returns the public event
 	 */
-	public async getAllEvents(): Promise<IPublicEvent[]> {
-		const events = await Event.find().exec();
-		LOGGER.info(`${events.length} events are retrieved`);
-
-		return events.map((event) => ({
+	private _retrievePublicEvent(
+		event: HydratedDocument<IEventExtended>
+	): IPublicEvent {
+		return {
 			id: getDocumentId(event).toString(),
+			calendarId: event.calendarId,
 			name: event.name,
 			startTime: event.startTime,
 			endTime: event.endTime,
 			place: event.place,
-			recurrence: event.recurrence,
 			description: event.description,
-			participants: event.participants
-		}));
-	}
-
-	/**
-	 * retrieve a specific event by its id
-	 *
-	 * @param eventId the id of the event
-	 * @returns the found event
-	 */
-	public async getEventById(eventId: string): Promise<IPublicEvent | null> {
-		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
-
-		if (event !== null) {
-			LOGGER.info(`${eventId} is retrieved`);
-
-			return {
-				id: getDocumentId(event).toString(),
-				name: event.name,
-				startTime: event.startTime,
-				endTime: event.endTime,
-				place: event.place,
-				recurrence: event.recurrence,
-				description: event.description,
-				participants: event.participants
-			};
-		}
-
-		LOGGER.info(`${eventId} does not exist and its not retrieved`);
-		return null;
-	}
-
-	/**
-	 * retrieve a specific event by its event name
-	 *
-	 * @param name the name of the event to retrieve
-	 * @returns the found user
-	 */
-	public async getEventByName(name: string): Promise<IPublicEvent | null> {
-		const eventData = { name };
-
-		const events = await Event.find(eventData).exec();
-		const event = events[0];
-
-		if (event !== undefined) {
-			LOGGER.info(`${event.name} is retrieved`);
-
-			return {
-				id: getDocumentId(event).toString(),
-				name: event.name,
-				startTime: event.startTime,
-				endTime: event.endTime,
-				place: event.place,
-				recurrence: event.recurrence,
-				description: event.description,
-				participants: event.participants
-			};
-		}
-
-		LOGGER.info(`${name} does not exist and its not retrieved`);
-		return null;
+			participantsIds: event.participantsIds,
+			recurrence: event.recurrence
+		};
 	}
 
 	/**
 	 * create a new event
 	 *
+	 * @param userId the user id
+	 * @param calendarId the calendar id
 	 * @param name the event name
 	 * @param startTime the event start time
 	 * @param endTime the event end time
 	 * @param place the event place
 	 * @param description the event description
-	 * @param participants the event participant
+	 * @param participantsIds the event participants ids
 	 * @param recurrence the event recurrence
 	 * @returns newly created event
 	 */
-	public async insertEvent(
+	public async insert(
+		userId: string,
+		calendarId: string,
 		name: string,
 		startTime: IDate,
 		endTime: IDate,
 		place: string,
 		description: string,
-		participants: IUser[],
+		participantsIds: string[],
 		recurrence?: IRecurrence
 	): Promise<IPublicEvent> {
-		const eventData: IEvent = {
+		const eventData: IEventExtended = {
+			calendarId,
 			name,
 			startTime,
 			endTime,
 			place,
-			recurrence,
 			description,
-			participants
+			participantsIds: [...new Set([userId, ...participantsIds])],
+			recurrence
 		};
 
 		const event = new Event(eventData);
@@ -130,44 +82,77 @@ export class EventService {
 
 		LOGGER.info(`${event.name} is created`);
 
-		return {
-			id: getDocumentId(event).toString(),
-			name: event.name,
-			startTime: event.startTime,
-			endTime: event.endTime,
-			place: event.place,
-			recurrence: event.recurrence,
-			description: event.description,
-			participants: event.participants
-		};
+		return this._retrievePublicEvent(event);
+	}
+
+	/**
+	 * retrieve all events
+	 *
+	 * @param calendarId the calendar id
+	 * @returns all events
+	 */
+	public async getAll(calendarId: string): Promise<IPublicEvent[]> {
+		const events = await Event.find({ calendarId }).exec();
+
+		LOGGER.info(`${events.length} events are retrieved`);
+
+		return events.map((event) => this._retrievePublicEvent(event));
+	}
+
+	/**
+	 * retrieve a specific event by its id
+	 *
+	 * @param calendarId the calendar id
+	 * @param eventId the id of the event
+	 * @returns the found event
+	 */
+	public async getById(
+		calendarId: string,
+		eventId: string
+	): Promise<IPublicEvent | null> {
+		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
+
+		if (event !== null && event.calendarId === calendarId) {
+			LOGGER.info(`${eventId} is retrieved`);
+
+			return this._retrievePublicEvent(event);
+		}
+
+		LOGGER.info(`${eventId} does not exist and its not retrieved`);
+
+		return null;
 	}
 
 	/**
 	 * update a specific event by its id
 	 *
-	 * @param eventId the id of the event
-	 * @param newName the new name
-	 * @param newStartTime the new start time
-	 * @param newEndTime the new end time
-	 * @param newPlace the new place
-	 * @param newRecurrence the new recurrence
-	 * @param newDescription the new description
-	 * @param newParticipants the new participants
+	 * @param userId the user id
+	 * @param calendarId the calendar id
+	 * @param eventId the event id
+	 * @param newName the event new name
+	 * @param newStartTime the event new start time
+	 * @param newEndTime the event new end time
+	 * @param newPlace the event new place
+	 * @param newDescription the event new description
+	 * @param newParticipantsIds the event new participants ids
+	 * @param newRecurrence the event new recurrence
 	 * @returns if the update succeed
 	 */
-	public async updateEventById(
+	public async updateById(
+		userId: string,
+		calendarId: string,
 		eventId: string,
 		newName?: string,
 		newStartTime?: IDate,
 		newEndTime?: IDate,
 		newPlace?: string,
-		newRecurrence?: IRecurrence,
 		newDescription?: string,
-		newParticipants?: IUser[]
+		newParticipantsIds?: string[],
+		newRecurrence?: IRecurrence
 	): Promise<boolean> {
 		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
 
-		if (event === null) {
+		if (event === null || event.calendarId !== calendarId) {
 			LOGGER.info(`${eventId} does not exist and its not retrieved`);
 
 			return false;
@@ -189,16 +174,18 @@ export class EventService {
 			event.place = newPlace;
 		}
 
-		if (newRecurrence !== undefined) {
-			event.recurrence = newRecurrence;
-		}
-
 		if (newDescription !== undefined) {
 			event.description = newDescription;
 		}
 
-		if (newParticipants !== undefined) {
-			event.participants = newParticipants;
+		if (newParticipantsIds !== undefined) {
+			event.participantsIds = [
+				...new Set([userId, ...newParticipantsIds])
+			];
+		}
+
+		if (newRecurrence !== undefined) {
+			event.recurrence = newRecurrence;
 		}
 
 		await event.save();
@@ -211,13 +198,17 @@ export class EventService {
 	/**
 	 * delete a specific event by its id
 	 *
+	 * @param calendarId the calendar id
 	 * @param eventId the id of the event
 	 * @returns if the deletion succeed
 	 */
-	public async deleteEventById(eventId: string): Promise<boolean> {
+	public async deleteById(
+		calendarId: string,
+		eventId: string
+	): Promise<boolean> {
 		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
 
-		if (event === null) {
+		if (event === null || event.calendarId !== calendarId) {
 			LOGGER.info(`${eventId} does not exist and its not retrieved`);
 
 			return false;
