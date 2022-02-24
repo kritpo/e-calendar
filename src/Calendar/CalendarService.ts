@@ -154,12 +154,12 @@ export class CalendarService {
 			calendar.description = newDescription;
 		}
 
-		if (
-			newCollaboratorsIds !== undefined &&
-			calendar.type !== CalendarTypeEnum.PRIVATE
-		) {
-			calendar.collaboratorsIds = newCollaboratorsIds;
-		}
+		calendar.collaboratorsIds =
+			calendar.type === CalendarTypeEnum.PRIVATE
+				? []
+				: newCollaboratorsIds !== undefined
+				? newCollaboratorsIds
+				: calendar.collaboratorsIds;
 
 		await calendar.save();
 
