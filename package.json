@@ -36,7 +36,7 @@
 		"full-rebuild": "npm run clean && npm run tsoa && npm run lint && npm run build && npm run copyfiles",
 		"full-start": "npm run full-rebuild && cross-env NODE_ENV=production npm start",
 		"test-watch": "nodemon -x \"npm run full-rebuild && npm test\"",
-		"dev": "nodemon"
+		"dev": "nodemon --ignore **/*.spec.ts"
 	},
 	"dependencies": {
 		"body-parser": "^1.19.1",

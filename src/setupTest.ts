@@ -7,10 +7,12 @@ import chaiAsPromised from 'chai-as-promised';
 import dirtyChai from 'dirty-chai';
 import supertest from 'supertest';
 
+import { Calendar } from './Calendar/Calendar';
+import { Event } from './Event/Event';
+import { User } from './User/User';
 import { app } from './app';
 import { dbConnect } from './utils/db/dbConnect';
 import { getLogger } from './utils/logging/getLogger';
-import { dropDatabase } from './utils/test/dbUtils';
 
 chai.use(chaiAsPromised);
 chai.use(dirtyChai);
@@ -26,6 +28,15 @@ export const itShould = chai.should();
  * prepared supertest request
  */
 export const appRequest = supertest(app);
+
+/**
+ * remove all database data
+ */
+export const dropDatabase = async (): Promise<void> => {
+	await Event.deleteMany({});
+	await Calendar.deleteMany({});
+	await User.deleteMany({});
+};
 
 export const mochaHooks = {
 	/**
