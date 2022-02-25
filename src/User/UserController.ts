@@ -97,7 +97,7 @@ export class UserController extends Controller {
 
 		this.setStatus(201);
 
-		return this._userService.insert(userBody.username, userBody.password);
+		return this._userService.insert(userBody);
 	}
 
 	/**
@@ -250,11 +250,7 @@ export class UserController extends Controller {
 
 		return generateResponse(
 			async () => {
-				await this._userService.updateById(
-					userId,
-					newUserBody.username,
-					newUserBody.password
-				);
+				await this._userService.updateById(userId, newUserBody);
 			},
 			{
 				notAuthenticatedResponse,

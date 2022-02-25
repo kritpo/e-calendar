@@ -9,6 +9,7 @@ import { getLogger } from '../utils/logging/getLogger';
 import {
 	Calendar,
 	CalendarTypeEnum,
+	ICalendar,
 	ICalendarExtended,
 	IPublicCalendar
 } from './Calendar';
@@ -60,31 +61,23 @@ export class CalendarService extends AbstractBaseService<
 	 * create a new calendar
 	 *
 	 * @param ownerId the owner id
-	 * @param name the calendar name
-	 * @param type the calendar type
-	 * @param description the calendar description
-	 * @param collaboratorsIds the calendar collaborators ids
+	 * @param calendarData the calendar data
 	 * @returns newly created calendar
 	 */
 	public async insert(
 		ownerId: string,
-		name: string,
-		type: CalendarTypeEnum,
-		description: string,
-		collaboratorsIds: string[]
+		calendarData: ICalendar
 	): Promise<IPublicCalendar> {
-		const calendarData: ICalendarExtended = {
+		const calendarExtendedData: ICalendarExtended = {
+			...calendarData,
 			ownerId,
-			name,
-			type,
-			description,
 			collaboratorsIds:
-				type === CalendarTypeEnum.PRIVATE
+				calendarData.type === CalendarTypeEnum.PRIVATE
 					? []
-					: [...new Set(collaboratorsIds)]
+					: [...new Set(calendarData.collaboratorsIds)]
 		};
 
-		const calendar = await this._insert(Calendar, calendarData);
+		const calendar = await this._insert(Calendar, calendarExtendedData);
 
 		LOGGER.info(`${calendar.name} is created`);
 
@@ -137,18 +130,12 @@ export class CalendarService extends AbstractBaseService<
 	 * update a specific calendar by its id
 	 *
 	 * @param calendarId the id of the calendar
-	 * @param newName the calendar new name
-	 * @param newType the calendar new type
-	 * @param newDescription the calendar new description
-	 * @param newCollaboratorsIds the calendar new collaborators ids
+	 * @param newCalendarData the calendar new data
 	 * @returns if the update succeed
 	 */
 	public async updateById(
 		calendarId: string,
-		newName?: string,
-		newType?: CalendarTypeEnum,
-		newDescription?: string,
-		newCollaboratorsIds?: string[]
+		newCalendarData: Partial<ICalendar>
 	): Promise<boolean> {
 		const calendar = await Calendar.findById(
 			new Types.ObjectId(calendarId)
@@ -160,23 +147,23 @@ export class CalendarService extends AbstractBaseService<
 			return false;
 		}
 
-		if (checkExistence(newName)) {
-			calendar.name = newName;
+		if (checkExistence(newCalendarData.name)) {
+			calendar.name = newCalendarData.name;
 		}
 
-		if (checkExistence(newType)) {
-			calendar.type = newType;
+		if (checkExistence(newCalendarData.type)) {
+			calendar.type = newCalendarData.type;
 		}
 
-		if (checkExistence(newDescription)) {
-			calendar.description = newDescription;
+		if (checkExistence(newCalendarData.description)) {
+			calendar.description = newCalendarData.description;
 		}
 
 		calendar.collaboratorsIds =
 			calendar.type === CalendarTypeEnum.PRIVATE
 				? []
-				: checkExistence(newCollaboratorsIds)
-				? [...new Set(newCollaboratorsIds)]
+				: checkExistence(newCalendarData.collaboratorsIds)
+				? [...new Set(newCalendarData.collaboratorsIds)]
 				: calendar.collaboratorsIds;
 
 		await calendar.save();
@@ -200,6 +187,13 @@ export class CalendarService extends AbstractBaseService<
 
 			return false;
 		}
+
+		const events = await this._eventService.getAll(calendarId);
+		await Promise.all(
+			events.map(async (event) => {
+				return this._eventService.deleteById(calendarId, event.id);
+			})
+		);
 
 		await calendar.delete();
 

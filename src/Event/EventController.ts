@@ -22,7 +22,7 @@ import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
 import { getUserFromRequest } from '../utils/security/getUserFromRequest';
-import { IDate, IEvent, IPublicEvent, IRecurrence } from './Event';
+import { IEvent, IPublicEvent } from './Event';
 import { EventService } from './EventService';
 
 /**
@@ -34,35 +34,6 @@ import { EventService } from './EventService';
 @Security('token')
 @Route('/calendars/{calendarId}/events')
 export class EventController extends Controller {
-	/**
-	 * ensure that the date contains only specified data
-	 *
-	 * @param date the date
-	 * @returns the isolated date
-	 */
-	private _isolateDate(date: IDate): IDate {
-		return {
-			day: date.day,
-			month: date.month,
-			year: date.year,
-			hour: date.hour,
-			minute: date.minute
-		};
-	}
-
-	/**
-	 * ensure that the recurrence contains only specified data
-	 *
-	 * @param recurrence the recurrence
-	 * @returns the isolated recurrence
-	 */
-	private _isolateRecurrence(recurrence: IRecurrence): IRecurrence {
-		return {
-			type: recurrence.type,
-			end: this._isolateDate(recurrence.end)
-		};
-	}
-
 	/**
 	 * create a event controller
 	 *
@@ -165,14 +136,7 @@ export class EventController extends Controller {
 					return this._eventService.insert(
 						reqUser.id,
 						calendarId,
-						eventBody.name,
-						this._isolateDate(eventBody.startTime),
-						this._isolateDate(eventBody.endTime),
-						eventBody.place,
-						eventBody.description,
-						eventBody.participantsIds,
-						eventBody.recurrence &&
-							this._isolateRecurrence(eventBody.recurrence)
+						eventBody
 					);
 				}
 			},
@@ -305,16 +269,7 @@ export class EventController extends Controller {
 						reqUser.id,
 						calendarId,
 						eventId,
-						newEventBody.name,
-						newEventBody.startTime &&
-							this._isolateDate(newEventBody.startTime),
-						newEventBody.endTime &&
-							this._isolateDate(newEventBody.endTime),
-						newEventBody.place,
-						newEventBody.description,
-						newEventBody.participantsIds,
-						newEventBody.recurrence &&
-							this._isolateRecurrence(newEventBody.recurrence)
+						newEventBody
 					);
 				}
 			},

@@ -99,10 +99,7 @@ export class CalendarController extends Controller {
 				if (checkExistenceOrShouldNotHappen(reqUser)) {
 					return this._calendarService.insert(
 						reqUser.id,
-						calendarBody.name,
-						calendarBody.type,
-						calendarBody.description,
-						calendarBody.collaboratorsIds
+						calendarBody
 					);
 				}
 			},
@@ -192,10 +189,7 @@ export class CalendarController extends Controller {
 			async () => {
 				await this._calendarService.updateById(
 					calendarId,
-					newCalendarBody.name,
-					newCalendarBody.type,
-					newCalendarBody.description,
-					newCalendarBody.collaboratorsIds
+					newCalendarBody
 				);
 			},
 			{

@@ -5,13 +5,7 @@ import { AbstractBaseService } from '../Base/BaseService';
 import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
-import {
-	Event,
-	IDate,
-	IEventExtended,
-	IPublicEvent,
-	IRecurrence
-} from './Event';
+import { Event, IEvent, IEventExtended, IPublicEvent } from './Event';
 
 const LOGGER = getLogger('EventService');
 
@@ -51,38 +45,23 @@ export class EventService extends AbstractBaseService<
 	 *
 	 * @param userId the user id
 	 * @param calendarId the calendar id
-	 * @param name the event name
-	 * @param startTime the event start time
-	 * @param endTime the event end time
-	 * @param place the event place
-	 * @param description the event description
-	 * @param participantsIds the event participants ids
-	 * @param recurrence the event recurrence
+	 * @param eventData the event data
 	 * @returns newly created event
 	 */
 	public async insert(
 		userId: string,
 		calendarId: string,
-		name: string,
-		startTime: IDate,
-		endTime: IDate,
-		place: string,
-		description: string,
-		participantsIds: string[],
-		recurrence?: IRecurrence
+		eventData: IEvent
 	): Promise<IPublicEvent> {
-		const eventData: IEventExtended = {
+		const eventExtendedData: IEventExtended = {
+			...eventData,
 			calendarId,
-			name,
-			startTime,
-			endTime,
-			place,
-			description,
-			participantsIds: [...new Set([userId, ...participantsIds])],
-			recurrence
+			participantsIds: [
+				...new Set([userId, ...eventData.participantsIds])
+			]
 		};
 
-		const event = await this._insert(Event, eventData);
+		const event = await this._insert(Event, eventExtendedData);
 
 		LOGGER.info(`${event.name} is created`);
 
@@ -133,26 +112,14 @@ export class EventService extends AbstractBaseService<
 	 * @param userId the user id
 	 * @param calendarId the calendar id
 	 * @param eventId the event id
-	 * @param newName the event new name
-	 * @param newStartTime the event new start time
-	 * @param newEndTime the event new end time
-	 * @param newPlace the event new place
-	 * @param newDescription the event new description
-	 * @param newParticipantsIds the event new participants ids
-	 * @param newRecurrence the event new recurrence
+	 * @param newEventData the event new data
 	 * @returns if the update succeed
 	 */
 	public async updateById(
 		userId: string,
 		calendarId: string,
 		eventId: string,
-		newName?: string,
-		newStartTime?: IDate,
-		newEndTime?: IDate,
-		newPlace?: string,
-		newDescription?: string,
-		newParticipantsIds?: string[],
-		newRecurrence?: IRecurrence
+		newEventData: Partial<IEvent>
 	): Promise<boolean> {
 		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
 
@@ -162,34 +129,34 @@ export class EventService extends AbstractBaseService<
 			return false;
 		}
 
-		if (checkExistence(newName)) {
-			event.name = newName;
+		if (checkExistence(newEventData.name)) {
+			event.name = newEventData.name;
 		}
 
-		if (checkExistence(newStartTime)) {
-			event.startTime = newStartTime;
+		if (checkExistence(newEventData.startTime)) {
+			event.startTime = newEventData.startTime;
 		}
 
-		if (checkExistence(newEndTime)) {
-			event.endTime = newEndTime;
+		if (checkExistence(newEventData.endTime)) {
+			event.endTime = newEventData.endTime;
 		}
 
-		if (checkExistence(newPlace)) {
-			event.place = newPlace;
+		if (checkExistence(newEventData.place)) {
+			event.place = newEventData.place;
 		}
 
-		if (checkExistence(newDescription)) {
-			event.description = newDescription;
+		if (checkExistence(newEventData.description)) {
+			event.description = newEventData.description;
 		}
 
-		if (checkExistence(newParticipantsIds)) {
+		if (checkExistence(newEventData.participantsIds)) {
 			event.participantsIds = [
-				...new Set([userId, ...newParticipantsIds])
+				...new Set([userId, ...newEventData.participantsIds])
 			];
 		}
 
-		if (checkExistence(newRecurrence)) {
-			event.recurrence = newRecurrence;
+		if (checkExistence(newEventData.recurrence)) {
+			event.recurrence = newEventData.recurrence;
 		}
 
 		await event.save();
