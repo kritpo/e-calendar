@@ -12,10 +12,35 @@ export enum EventRecurrenceTypeEnum {
 }
 
 export interface IDate {
+	/**
+	 * @isInt
+	 * @minimum 1
+	 * @maximum 31
+	 */
 	day: number;
+	/**
+	 * @isInt
+	 * @minimum 1
+	 * @maximum 12
+	 */
 	month: number;
+	/**
+	 * @isInt
+	 * @minimum 1900
+	 * @maximum 2100
+	 */
 	year: number;
+	/**
+	 * @isInt
+	 * @minimum 0
+	 * @maximum 23
+	 */
 	hour?: number;
+	/**
+	 * @isInt
+	 * @minimum 0
+	 * @maximum 59
+	 */
 	minute?: number;
 }
 const dateSchema = new Schema<IDate>({

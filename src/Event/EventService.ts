@@ -5,7 +5,14 @@ import { AbstractBaseService } from '../Base/BaseService';
 import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
-import { Event, IEvent, IEventExtended, IPublicEvent } from './Event';
+import {
+	Event,
+	IDate,
+	IEvent,
+	IEventExtended,
+	IPublicEvent,
+	IRecurrence
+} from './Event';
 
 const LOGGER = getLogger('EventService');
 
@@ -19,6 +26,39 @@ export class EventService extends AbstractBaseService<
 	IPublicEvent
 > {
 	/**
+	 * retrieve the public date
+	 *
+	 * @param date the date document
+	 * @returns the public date
+	 */
+	private _retrievePublicDate(date: IDate): IDate {
+		return {
+			day: date.day,
+			month: date.month,
+			year: date.year,
+			hour: date.hour,
+			minute: date.minute
+		};
+	}
+
+	/**
+	 * retrieve the public recurrence
+	 *
+	 * @param recurrence the recurrence document
+	 * @returns the public recurrence
+	 */
+	private _retrievePublicRecurrence(
+		recurrence?: IRecurrence
+	): IRecurrence | undefined {
+		return checkExistence(recurrence)
+			? {
+					type: recurrence.type,
+					end: this._retrievePublicDate(recurrence.end)
+			  }
+			: recurrence;
+	}
+
+	/**
 	 * retrieve the public event
 	 *
 	 * @param event the event document
@@ -31,12 +71,12 @@ export class EventService extends AbstractBaseService<
 			id: getDocumentId(event).toString(),
 			calendarId: event.calendarId,
 			name: event.name,
-			startTime: event.startTime,
-			endTime: event.endTime,
+			startTime: this._retrievePublicDate(event.startTime),
+			endTime: this._retrievePublicDate(event.endTime),
 			place: event.place,
 			description: event.description,
 			participantsIds: event.participantsIds,
-			recurrence: event.recurrence
+			recurrence: this._retrievePublicRecurrence(event.recurrence)
 		};
 	}
 

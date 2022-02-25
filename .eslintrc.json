@@ -173,7 +173,11 @@
 			}
 		],
 		"jsdoc/require-param-type": "off",
-		"jsdoc/require-returns-type": "off"
+		"jsdoc/require-returns-type": "off",
+		"jsdoc/check-tag-names": [
+			"warn",
+			{ "definedTags": ["isInt", "minimum", "maximum"] }
+		]
 	},
 	"overrides": [
 		{
