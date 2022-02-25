@@ -64,13 +64,15 @@ export class EventController extends Controller {
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicEvent[]> {
+	): Promise<IPublicEvent[] | void> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 
 		return generateResponse(
 			async () => {
-				return this._eventService.getAll(calendarId);
+				if (checkExistenceOrShouldNotHappen(reqUser)) {
+					return this._eventService.getAll(calendarId, reqUser.id);
+				}
 			},
 			{
 				notAuthenticatedResponse,
@@ -132,12 +134,8 @@ export class EventController extends Controller {
 
 		return generateResponse(
 			() => {
-				if (checkExistenceOrShouldNotHappen(reqUser)) {
-					return this._eventService.insert(
-						reqUser.id,
-						calendarId,
-						eventBody
-					);
+				if (checkExistenceOrShouldNotHappen(calendar)) {
+					return this._eventService.insert(calendar, eventBody);
 				}
 			},
 			{
@@ -264,10 +262,9 @@ export class EventController extends Controller {
 
 		return generateResponse(
 			async () => {
-				if (checkExistenceOrShouldNotHappen(reqUser)) {
+				if (checkExistenceOrShouldNotHappen(calendar)) {
 					await this._eventService.updateById(
-						reqUser.id,
-						calendarId,
+						calendar,
 						eventId,
 						newEventBody
 					);

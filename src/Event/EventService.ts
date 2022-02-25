@@ -2,6 +2,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
 import { AbstractBaseService } from '../Base/BaseService';
+import { IPublicCalendar } from '../Calendar/Calendar';
 import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
@@ -83,21 +84,23 @@ export class EventService extends AbstractBaseService<
 	/**
 	 * create a new event
 	 *
-	 * @param userId the user id
-	 * @param calendarId the calendar id
+	 * @param calendar the calendar
 	 * @param eventData the event data
 	 * @returns newly created event
 	 */
 	public async insert(
-		userId: string,
-		calendarId: string,
+		calendar: IPublicCalendar,
 		eventData: IEvent
 	): Promise<IPublicEvent> {
 		const eventExtendedData: IEventExtended = {
 			...eventData,
-			calendarId,
+			calendarId: calendar.id,
 			participantsIds: [
-				...new Set([userId, ...eventData.participantsIds])
+				...new Set([
+					calendar.ownerId,
+					...calendar.collaboratorsIds,
+					...eventData.participantsIds
+				])
 			]
 		};
 
@@ -112,10 +115,17 @@ export class EventService extends AbstractBaseService<
 	 * retrieve all events
 	 *
 	 * @param calendarId the calendar id
+	 * @param userId the user id
 	 * @returns all events
 	 */
-	public async getAll(calendarId: string): Promise<IPublicEvent[]> {
-		const events = await Event.find({ calendarId }).exec();
+	public async getAll(
+		calendarId: string,
+		userId?: string
+	): Promise<IPublicEvent[]> {
+		const events = await Event.find({
+			calendarId,
+			participantsIds: userId
+		}).exec();
 
 		LOGGER.info(`${events.length} events are retrieved`);
 
@@ -149,21 +159,19 @@ export class EventService extends AbstractBaseService<
 	/**
 	 * update a specific event by its id
 	 *
-	 * @param userId the user id
-	 * @param calendarId the calendar id
+	 * @param calendar the calendar
 	 * @param eventId the event id
 	 * @param newEventData the event new data
 	 * @returns if the update succeed
 	 */
 	public async updateById(
-		userId: string,
-		calendarId: string,
+		calendar: IPublicCalendar,
 		eventId: string,
 		newEventData: Partial<IEvent>
 	): Promise<boolean> {
 		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
 
-		if (!checkExistence(event) || event.calendarId !== calendarId) {
+		if (!checkExistence(event) || event.calendarId !== calendar.id) {
 			LOGGER.info(`${eventId} does not exist and its not retrieved`);
 
 			return false;
@@ -191,7 +199,11 @@ export class EventService extends AbstractBaseService<
 
 		if (checkExistence(newEventData.participantsIds)) {
 			event.participantsIds = [
-				...new Set([userId, ...newEventData.participantsIds])
+				...new Set([
+					calendar.ownerId,
+					...calendar.collaboratorsIds,
+					...newEventData.participantsIds
+				])
 			];
 		}
 
