@@ -1,4 +1,4 @@
-import { checkExistence } from '../../checkExistance';
+import { checkExistence } from '../../checkExistence';
 import { LoggingLevelEnum } from '../types';
 import { AbstractLogger } from './AbstractLogger';
 

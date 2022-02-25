@@ -3,7 +3,7 @@ import { container } from 'tsyringe';
 
 import { IPublicUser } from '../../User/User';
 import { UserService } from '../../User/UserService';
-import { checkExistence } from '../checkExistance';
+import { checkExistence } from '../checkExistence';
 import { getLogger } from '../logging/getLogger';
 import { SecurityService } from '../security/SecurityService';
 

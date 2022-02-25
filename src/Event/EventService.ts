@@ -2,7 +2,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
 import { AbstractBaseService } from '../Base/BaseService';
-import { checkExistence } from '../utils/checkExistance';
+import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import {

@@ -1,7 +1,7 @@
 import { TsoaResponse } from 'tsoa';
 
 import { IPublicUser } from '../../User/User';
-import { checkExistence } from '../checkExistance';
+import { checkExistence } from '../checkExistence';
 import { IErrorResponse } from './IErrorResponse';
 import { generateErrorResponse } from './generateErrorResponse';
 

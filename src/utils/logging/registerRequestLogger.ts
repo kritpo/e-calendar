@@ -2,7 +2,7 @@
 import { Express, Request } from 'express';
 import morgan from 'morgan';
 
-import { checkExistence } from '../checkExistance';
+import { checkExistence } from '../checkExistence';
 import { getLogger } from './getLogger';
 
 const LOGGER = getLogger('REQUEST');

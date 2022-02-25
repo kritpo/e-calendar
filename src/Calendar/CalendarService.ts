@@ -3,7 +3,7 @@ import { injectable, singleton } from 'tsyringe';
 
 import { AbstractBaseService } from '../Base/BaseService';
 import { EventService } from '../Event/EventService';
-import { checkExistence } from '../utils/checkExistance';
+import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import {

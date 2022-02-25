@@ -19,7 +19,7 @@ import { injectable } from 'tsyringe';
 import {
 	checkExistence,
 	checkExistenceOrShouldNotHappen
-} from '../utils/checkExistance';
+} from '../utils/checkExistence';
 import { generateErrorResponse } from '../utils/response/generateErrorResponse';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';

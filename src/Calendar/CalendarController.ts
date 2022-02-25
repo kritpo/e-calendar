@@ -16,7 +16,7 @@ import {
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
-import { checkExistenceOrShouldNotHappen } from '../utils/checkExistance';
+import { checkExistenceOrShouldNotHappen } from '../utils/checkExistence';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
