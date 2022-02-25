@@ -236,7 +236,7 @@ export class UserController extends Controller {
 				newUserBody.username
 			);
 
-			if (checkExistence(tempUser)) {
+			if (checkExistence(tempUser) && tempUser.id !== userId) {
 				return generateErrorResponse<409, void>(
 					conflictResponse,
 					409,
