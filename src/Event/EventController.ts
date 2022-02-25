@@ -155,7 +155,7 @@ export class EventController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicEvent | undefined> {
+	): Promise<IPublicEvent | void> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 
@@ -215,7 +215,7 @@ export class EventController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicEvent | undefined> {
+	): Promise<IPublicEvent | void> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 		const event = await this._eventService.getById(calendarId, eventId);

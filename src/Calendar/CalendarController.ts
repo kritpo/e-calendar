@@ -57,7 +57,7 @@ export class CalendarController extends Controller {
 	public async getAllCalendars(
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<IPublicCalendar[] | undefined> {
+	): Promise<IPublicCalendar[] | void> {
 		const reqUser = getUserFromRequest(req);
 
 		return generateResponse(
@@ -91,7 +91,7 @@ export class CalendarController extends Controller {
 		@Body() calendarBody: ICalendar,
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<IPublicCalendar | undefined> {
+	): Promise<IPublicCalendar | void> {
 		const reqUser = getUserFromRequest(req);
 
 		return generateResponse(
@@ -131,7 +131,7 @@ export class CalendarController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicCalendar | undefined> {
+	): Promise<IPublicCalendar | void> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 

@@ -113,7 +113,7 @@ export class UserController extends Controller {
 	public async loginUser(
 		@Body() userBody: IUser,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<ISecurityTokens | undefined> {
+	): Promise<ISecurityTokens | void> {
 		const reqUser = await this._userService.getByUsernameAndPassword(
 			userBody.username,
 			userBody.password
@@ -191,7 +191,7 @@ export class UserController extends Controller {
 	public async getUser(
 		@Path() userId: string,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicUser | undefined> {
+	): Promise<IPublicUser | void> {
 		const user = await this._userService.getById(userId);
 
 		return generateResponse(
