@@ -62,3 +62,8 @@ export const mochaHooks = {
 			});
 	}
 };
+
+/**
+ * dumb Mongoose compliant id
+ */
+export const MONGO_DUMB_ID = '5d6ede6a0ba62570afcedd3a';

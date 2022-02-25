@@ -148,12 +148,12 @@ export class UserController extends Controller {
 		@Body() tokenBody: ITokenBody,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<ISecurityTokens> {
+	): Promise<ISecurityTokens | void> {
 		const user = await this._userService.getById(userId);
 
 		return generateResponse(
 			() => {
-				if (checkExistence(user)) {
+				if (checkExistenceOrShouldNotHappen(user)) {
 					const response =
 						this._securityService.updateAccessTokenToken(
 							user.id,
@@ -170,8 +170,6 @@ export class UserController extends Controller {
 						'Not Authorized'
 					);
 				}
-
-				throw new Error('Should not happen');
 			},
 			{
 				notFoundResponse,
