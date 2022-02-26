@@ -2,7 +2,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
 import { AbstractBaseService } from '../Base/BaseService';
-import { checkExistence } from '../utils/checkExistance';
+import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import { SecurityService } from '../utils/security/SecurityService';
@@ -41,16 +41,13 @@ export class UserService extends AbstractBaseService<IUser, IPublicUser> {
 	/**
 	 * create a new account
 	 *
-	 * @param username the account username
-	 * @param plainPassword the account plain password
+	 * @param userData the user data
 	 * @returns newly created account
 	 */
-	public async insert(
-		username: string,
-		plainPassword: string
-	): Promise<IPublicUser> {
-		const password = this._securityService.hashPassword(plainPassword);
-		const userData: IUser = { username, password };
+	public async insert(userData: IUser): Promise<IPublicUser> {
+		userData.password = this._securityService.hashPassword(
+			userData.password
+		);
 
 		const user = await this._insert(User, userData);
 
@@ -145,14 +142,12 @@ export class UserService extends AbstractBaseService<IUser, IPublicUser> {
 	 * update a specific user by its id
 	 *
 	 * @param userId the id of the user
-	 * @param newUsername the new username
-	 * @param plainNewPassword the new password
+	 * @param newUserData the new user data
 	 * @returns if the update succeed
 	 */
 	public async updateById(
 		userId: string,
-		newUsername?: string,
-		plainNewPassword?: string
+		newUserData: Partial<IUser>
 	): Promise<boolean> {
 		const user = await User.findById(new Types.ObjectId(userId)).exec();
 
@@ -162,13 +157,14 @@ export class UserService extends AbstractBaseService<IUser, IPublicUser> {
 			return false;
 		}
 
-		if (checkExistence(newUsername)) {
-			user.username = newUsername;
+		if (checkExistence(newUserData.username)) {
+			user.username = newUserData.username;
 		}
 
-		if (checkExistence(plainNewPassword)) {
-			const newPassword =
-				this._securityService.hashPassword(plainNewPassword);
+		if (checkExistence(newUserData.password)) {
+			const newPassword = this._securityService.hashPassword(
+				newUserData.password
+			);
 			user.password = newPassword;
 		}
 

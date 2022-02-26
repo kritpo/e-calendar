@@ -18,6 +18,10 @@ jobs:
                   envkey_MONGODB_HOST: ${{ secrets.MONGODB_HOST }}
                   envkey_MONGODB_PORT: ${{ secrets.MONGODB_PORT }}
                   envkey_MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+                  envkey_PORT: ${{ secrets.PORT }}
+                  envkey_SEED: ${{ secrets.SEED }}
+                  envkey_ACCESS_TOKEN_EXPIRES_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRES_MINUTES }}
+                  envkey_REFRESH_TOKEN_EXPIRES_MINUTES: ${{ secrets.REFRESH_TOKEN_EXPIRES_MINUTES }}
                   file_name: .env
 
             - name: start dependencies containers

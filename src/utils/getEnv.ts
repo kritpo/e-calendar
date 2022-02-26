@@ -1,4 +1,4 @@
-import { checkExistence } from './checkExistance';
+import { checkExistence } from './checkExistence';
 
 /**
  * retrieve the env variable

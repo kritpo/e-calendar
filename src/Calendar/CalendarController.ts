@@ -16,7 +16,7 @@ import {
 	TsoaResponse
 } from 'tsoa';
 import { injectable } from 'tsyringe';
-import { checkExistenceOrShouldNotHappen } from '../utils/checkExistance';
+import { checkExistenceOrShouldNotHappen } from '../utils/checkExistence';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
 import { AuthorizationService } from '../utils/security/AuthorizationService';
@@ -57,7 +57,7 @@ export class CalendarController extends Controller {
 	public async getAllCalendars(
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<IPublicCalendar[] | undefined> {
+	): Promise<IPublicCalendar[] | void> {
 		const reqUser = getUserFromRequest(req);
 
 		return generateResponse(
@@ -91,7 +91,7 @@ export class CalendarController extends Controller {
 		@Body() calendarBody: ICalendar,
 		@Request() req: express.Request,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<IPublicCalendar | undefined> {
+	): Promise<IPublicCalendar | void> {
 		const reqUser = getUserFromRequest(req);
 
 		return generateResponse(
@@ -99,10 +99,7 @@ export class CalendarController extends Controller {
 				if (checkExistenceOrShouldNotHappen(reqUser)) {
 					return this._calendarService.insert(
 						reqUser.id,
-						calendarBody.name,
-						calendarBody.type,
-						calendarBody.description,
-						calendarBody.collaboratorsIds
+						calendarBody
 					);
 				}
 			},
@@ -131,7 +128,7 @@ export class CalendarController extends Controller {
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicCalendar | undefined> {
+	): Promise<IPublicCalendar | void> {
 		const reqUser = getUserFromRequest(req);
 		const calendar = await this._calendarService.getById(calendarId);
 
@@ -192,10 +189,7 @@ export class CalendarController extends Controller {
 			async () => {
 				await this._calendarService.updateById(
 					calendarId,
-					newCalendarBody.name,
-					newCalendarBody.type,
-					newCalendarBody.description,
-					newCalendarBody.collaboratorsIds
+					newCalendarBody
 				);
 			},
 			{

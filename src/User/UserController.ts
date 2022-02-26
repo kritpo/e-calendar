@@ -19,7 +19,7 @@ import { injectable } from 'tsyringe';
 import {
 	checkExistence,
 	checkExistenceOrShouldNotHappen
-} from '../utils/checkExistance';
+} from '../utils/checkExistence';
 import { generateErrorResponse } from '../utils/response/generateErrorResponse';
 import { generateResponse } from '../utils/response/generateResponse';
 import { IErrorResponse } from '../utils/response/IErrorResponse';
@@ -97,7 +97,7 @@ export class UserController extends Controller {
 
 		this.setStatus(201);
 
-		return this._userService.insert(userBody.username, userBody.password);
+		return this._userService.insert(userBody);
 	}
 
 	/**
@@ -113,7 +113,7 @@ export class UserController extends Controller {
 	public async loginUser(
 		@Body() userBody: IUser,
 		@Res() notAuthenticatedResponse: TsoaResponse<401, IErrorResponse>
-	): Promise<ISecurityTokens | undefined> {
+	): Promise<ISecurityTokens | void> {
 		const reqUser = await this._userService.getByUsernameAndPassword(
 			userBody.username,
 			userBody.password
@@ -148,12 +148,12 @@ export class UserController extends Controller {
 		@Body() tokenBody: ITokenBody,
 		@Res() notAuthorizedResponse: TsoaResponse<403, IErrorResponse>,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<ISecurityTokens> {
+	): Promise<ISecurityTokens | void> {
 		const user = await this._userService.getById(userId);
 
 		return generateResponse(
 			() => {
-				if (checkExistence(user)) {
+				if (checkExistenceOrShouldNotHappen(user)) {
 					const response =
 						this._securityService.updateAccessTokenToken(
 							user.id,
@@ -170,8 +170,6 @@ export class UserController extends Controller {
 						'Not Authorized'
 					);
 				}
-
-				throw new Error('Should not happen');
 			},
 			{
 				notFoundResponse,
@@ -191,7 +189,7 @@ export class UserController extends Controller {
 	public async getUser(
 		@Path() userId: string,
 		@Res() notFoundResponse: TsoaResponse<404, IErrorResponse>
-	): Promise<IPublicUser | undefined> {
+	): Promise<IPublicUser | void> {
 		const user = await this._userService.getById(userId);
 
 		return generateResponse(
@@ -236,7 +234,7 @@ export class UserController extends Controller {
 				newUserBody.username
 			);
 
-			if (checkExistence(tempUser)) {
+			if (checkExistence(tempUser) && tempUser.id !== userId) {
 				return generateErrorResponse<409, void>(
 					conflictResponse,
 					409,
@@ -250,11 +248,7 @@ export class UserController extends Controller {
 
 		return generateResponse(
 			async () => {
-				await this._userService.updateById(
-					userId,
-					newUserBody.username,
-					newUserBody.password
-				);
+				await this._userService.updateById(userId, newUserBody);
 			},
 			{
 				notAuthenticatedResponse,

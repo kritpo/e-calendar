@@ -4,7 +4,7 @@ import sha1 from 'crypto-js/sha1';
 import { addMinutes, isAfter, isBefore } from 'date-fns';
 import { singleton } from 'tsyringe';
 
-import { checkExistence } from '../checkExistance';
+import { checkExistence } from '../checkExistence';
 import { getEnv } from '../getEnv';
 import { getLogger } from '../logging/getLogger';
 

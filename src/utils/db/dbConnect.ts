@@ -9,7 +9,7 @@ const LOGGER = getLogger('DATABASE');
 /**
  * connect to the database
  */
-export const dbConnect = (): void => {
+export const dbConnect = async (): Promise<void> => {
 	const user = getEnv('MONGODB_USERNAME');
 	const pass = getEnv('MONGODB_PASSWORD');
 	const host = getEnv('MONGODB_HOST');
@@ -18,7 +18,7 @@ export const dbConnect = (): void => {
 
 	const uri = `mongodb://${host}:${port}`;
 
-	mongoose
+	await mongoose
 		.connect(uri, { user, pass, dbName })
 		.catch((err) =>
 			LOGGER.fatal(

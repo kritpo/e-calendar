@@ -1,6 +1,6 @@
 import { HydratedDocument, Model, Types } from 'mongoose';
 
-import { checkExistence } from '../utils/checkExistance';
+import { checkExistence } from '../utils/checkExistence';
 
 /**
  * base structure for service

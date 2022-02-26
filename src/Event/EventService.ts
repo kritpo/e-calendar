@@ -2,12 +2,14 @@ import { HydratedDocument, Types } from 'mongoose';
 import { injectable, singleton } from 'tsyringe';
 
 import { AbstractBaseService } from '../Base/BaseService';
-import { checkExistence } from '../utils/checkExistance';
+import { IPublicCalendar } from '../Calendar/Calendar';
+import { checkExistence } from '../utils/checkExistence';
 import { getDocumentId } from '../utils/db/getDocumentId';
 import { getLogger } from '../utils/logging/getLogger';
 import {
 	Event,
 	IDate,
+	IEvent,
 	IEventExtended,
 	IPublicEvent,
 	IRecurrence
@@ -25,6 +27,39 @@ export class EventService extends AbstractBaseService<
 	IPublicEvent
 > {
 	/**
+	 * retrieve the public date
+	 *
+	 * @param date the date document
+	 * @returns the public date
+	 */
+	private _retrievePublicDate(date: IDate): IDate {
+		return {
+			day: date.day,
+			month: date.month,
+			year: date.year,
+			hour: date.hour,
+			minute: date.minute
+		};
+	}
+
+	/**
+	 * retrieve the public recurrence
+	 *
+	 * @param recurrence the recurrence document
+	 * @returns the public recurrence
+	 */
+	private _retrievePublicRecurrence(
+		recurrence?: IRecurrence
+	): IRecurrence | undefined {
+		return checkExistence(recurrence)
+			? {
+					type: recurrence.type,
+					end: this._retrievePublicDate(recurrence.end)
+			  }
+			: recurrence;
+	}
+
+	/**
 	 * retrieve the public event
 	 *
 	 * @param event the event document
@@ -37,52 +72,39 @@ export class EventService extends AbstractBaseService<
 			id: getDocumentId(event).toString(),
 			calendarId: event.calendarId,
 			name: event.name,
-			startTime: event.startTime,
-			endTime: event.endTime,
+			startTime: this._retrievePublicDate(event.startTime),
+			endTime: this._retrievePublicDate(event.endTime),
 			place: event.place,
 			description: event.description,
 			participantsIds: event.participantsIds,
-			recurrence: event.recurrence
+			recurrence: this._retrievePublicRecurrence(event.recurrence)
 		};
 	}
 
 	/**
 	 * create a new event
 	 *
-	 * @param userId the user id
-	 * @param calendarId the calendar id
-	 * @param name the event name
-	 * @param startTime the event start time
-	 * @param endTime the event end time
-	 * @param place the event place
-	 * @param description the event description
-	 * @param participantsIds the event participants ids
-	 * @param recurrence the event recurrence
+	 * @param calendar the calendar
+	 * @param eventData the event data
 	 * @returns newly created event
 	 */
 	public async insert(
-		userId: string,
-		calendarId: string,
-		name: string,
-		startTime: IDate,
-		endTime: IDate,
-		place: string,
-		description: string,
-		participantsIds: string[],
-		recurrence?: IRecurrence
+		calendar: IPublicCalendar,
+		eventData: IEvent
 	): Promise<IPublicEvent> {
-		const eventData: IEventExtended = {
-			calendarId,
-			name,
-			startTime,
-			endTime,
-			place,
-			description,
-			participantsIds: [...new Set([userId, ...participantsIds])],
-			recurrence
+		const eventExtendedData: IEventExtended = {
+			...eventData,
+			calendarId: calendar.id,
+			participantsIds: [
+				...new Set([
+					calendar.ownerId,
+					...calendar.collaboratorsIds,
+					...eventData.participantsIds
+				])
+			]
 		};
 
-		const event = await this._insert(Event, eventData);
+		const event = await this._insert(Event, eventExtendedData);
 
 		LOGGER.info(`${event.name} is created`);
 
@@ -93,10 +115,17 @@ export class EventService extends AbstractBaseService<
 	 * retrieve all events
 	 *
 	 * @param calendarId the calendar id
+	 * @param userId the user id
 	 * @returns all events
 	 */
-	public async getAll(calendarId: string): Promise<IPublicEvent[]> {
-		const events = await Event.find({ calendarId }).exec();
+	public async getAll(
+		calendarId: string,
+		userId?: string
+	): Promise<IPublicEvent[]> {
+		const events = await Event.find({
+			calendarId,
+			participantsIds: userId
+		}).exec();
 
 		LOGGER.info(`${events.length} events are retrieved`);
 
@@ -130,66 +159,56 @@ export class EventService extends AbstractBaseService<
 	/**
 	 * update a specific event by its id
 	 *
-	 * @param userId the user id
-	 * @param calendarId the calendar id
+	 * @param calendar the calendar
 	 * @param eventId the event id
-	 * @param newName the event new name
-	 * @param newStartTime the event new start time
-	 * @param newEndTime the event new end time
-	 * @param newPlace the event new place
-	 * @param newDescription the event new description
-	 * @param newParticipantsIds the event new participants ids
-	 * @param newRecurrence the event new recurrence
+	 * @param newEventData the event new data
 	 * @returns if the update succeed
 	 */
 	public async updateById(
-		userId: string,
-		calendarId: string,
+		calendar: IPublicCalendar,
 		eventId: string,
-		newName?: string,
-		newStartTime?: IDate,
-		newEndTime?: IDate,
-		newPlace?: string,
-		newDescription?: string,
-		newParticipantsIds?: string[],
-		newRecurrence?: IRecurrence
+		newEventData: Partial<IEvent>
 	): Promise<boolean> {
 		const event = await Event.findById(new Types.ObjectId(eventId)).exec();
 
-		if (!checkExistence(event) || event.calendarId !== calendarId) {
+		if (!checkExistence(event) || event.calendarId !== calendar.id) {
 			LOGGER.info(`${eventId} does not exist and its not retrieved`);
 
 			return false;
 		}
 
-		if (checkExistence(newName)) {
-			event.name = newName;
+		if (checkExistence(newEventData.name)) {
+			event.name = newEventData.name;
 		}
 
-		if (checkExistence(newStartTime)) {
-			event.startTime = newStartTime;
+		if (checkExistence(newEventData.startTime)) {
+			event.startTime = newEventData.startTime;
 		}
 
-		if (checkExistence(newEndTime)) {
-			event.endTime = newEndTime;
+		if (checkExistence(newEventData.endTime)) {
+			event.endTime = newEventData.endTime;
 		}
 
-		if (checkExistence(newPlace)) {
-			event.place = newPlace;
+		if (checkExistence(newEventData.place)) {
+			event.place = newEventData.place;
 		}
 
-		if (checkExistence(newDescription)) {
-			event.description = newDescription;
+		if (checkExistence(newEventData.description)) {
+			event.description = newEventData.description;
 		}
 
-		if (checkExistence(newParticipantsIds)) {
+		if (checkExistence(newEventData.participantsIds)) {
 			event.participantsIds = [
-				...new Set([userId, ...newParticipantsIds])
+				...new Set([
+					calendar.ownerId,
+					...calendar.collaboratorsIds,
+					...newEventData.participantsIds
+				])
 			];
 		}
 
-		if (checkExistence(newRecurrence)) {
-			event.recurrence = newRecurrence;
+		if (checkExistence(newEventData.recurrence)) {
+			event.recurrence = newEventData.recurrence;
 		}
 
 		await event.save();
