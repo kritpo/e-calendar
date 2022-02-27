@@ -340,7 +340,7 @@ In your explanation, please provide links (file + line) to relevant parts of you
     > How did you achieve this?
     > You must link your documentation for review (a Github page, a ZIP archive, an attachment to the release notes...).
 
-    _Through TSOA, the OpenAPI specification is generated too. When launching the application, you could access to the API documentation [here](http://localhost:8080/docs) for `dev mode`._
+    _Through TSOA, the OpenAPI specification is generated too. When launching the application, you could access to the API documentation [here](http://localhost:8080/docs) for `dev mode`. The latest generated OpenAPI specification is accessible [here](https://drive.google.com/file/d/1AGtgzn8JbOtMd4GKdxFa00Xzn9dQxoj6/view?usp=sharing)._
 
 -   [x] In addition to requireness and types, do you provide a comment for every property of your documentation? **[1 point]**
 
